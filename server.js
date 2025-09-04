@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
 const { MongoClient } = require('mongodb');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
@@ -7,7 +8,7 @@ const { body, validationResult } = require('express-validator');
 require('dotenv').config();
 
 const app = express();
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 10000;
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-here-change-in-production';
 
 // Health check endpoint
@@ -45,36 +46,35 @@ const requireAdmin = (req, res, next) => {
 app.use(cors());
 app.use(express.json());
 
+// Serve static files from React build in production
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static(path.join(__dirname, 'dist')));
+}
+
 // MongoDB connection
 let db;
 let isConnected = false;
 let client = null;
 
-// Only create MongoDB client if connection string is provided
-if (process.env.MONGODB_CONNECTION_STRING) {
-  client = new MongoClient(process.env.MONGODB_CONNECTION_STRING, {
-    serverApi: {
-      version: '1',
-      strict: true,
-      deprecationErrors: true,
-    }
-  });
-}
+// MongoDB connection string
+const MONGODB_CONNECTION_STRING = process.env.MONGODB_CONNECTION_STRING || 'mongodb+srv://parthchaudharyjc_db_user:MDXJ9uSczB4xtFLI@cluster0.tuzgcyf.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0';
+
+// Create MongoDB client
+client = new MongoClient(MONGODB_CONNECTION_STRING, {
+  serverApi: {
+    version: '1',
+    strict: true,
+    deprecationErrors: true,
+  }
+});
 
 async function connectToDatabase() {
-  if (!client) {
-    console.log('⚠️ No MongoDB connection string provided - running in fallback mode');
-    console.log('⚠️ Data will not persist between server restarts');
-    isConnected = false;
-    return;
-  }
-
   try {
     await client.connect();
     await client.db('admin').command({ ping: 1 });
     db = client.db('launchlog');
     isConnected = true;
-    console.log('✅ Connected to MongoDB');
+    console.log('✅ Connected to MongoDB Atlas');
   } catch (error) {
     console.error('❌ MongoDB connection error:', error);
     console.log('⚠️ Running in fallback mode - data will not persist');
@@ -592,10 +592,18 @@ app.delete('/api/reset', async (req, res) => {
   }
 });
 
+// Catch all handler for React Router (must be after API routes)
+if (process.env.NODE_ENV === 'production') {
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'dist/index.html'));
+  });
+}
+
 // Start server
 connectToDatabase().then(() => {
-  app.listen(PORT, 'localhost', () => {
-    console.log(`🚀 Server running on localhost:${PORT}`);
+  app.listen(PORT, '0.0.0.0', () => {
+    console.log(`🚀 Server running on port ${PORT}`);
+    console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
   });
 });
 

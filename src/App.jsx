@@ -11,6 +11,7 @@ import Admin from './components/Admin'
 
 function App() {
   const [showCover, setShowCover] = useState(true)
+  const [showAuth, setShowAuth] = useState(false)
   const [activeSection, setActiveSection] = useState('dashboard')
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [user, setUser] = useState(null)
@@ -27,18 +28,21 @@ function App() {
     if (token && savedUser) {
       setUser(JSON.parse(savedUser))
       setIsAuthenticated(true)
+      setShowCover(false)
+      setShowAuth(false)
     }
     setAuthChecked(true)
   }, [])
 
   const handleEnterApp = () => {
     setShowCover(false)
+    setShowAuth(true)
   }
 
   const handleAuthSuccess = (userData, token) => {
     setUser(userData)
     setIsAuthenticated(true)
-    setShowCover(false)
+    setShowAuth(false)
   }
 
   const handleLogout = () => {
@@ -47,6 +51,7 @@ function App() {
     setUser(null)
     setIsAuthenticated(false)
     setShowCover(true)
+    setShowAuth(false)
   }
 
   const renderActiveSection = () => {
@@ -76,12 +81,12 @@ function App() {
     )
   }
 
-  if (!isAuthenticated) {
-    return <Auth onAuthSuccess={handleAuthSuccess} />
-  }
-
   if (showCover) {
     return <Cover onEnter={handleEnterApp} />
+  }
+
+  if (showAuth && !isAuthenticated) {
+    return <Auth onAuthSuccess={handleAuthSuccess} />
   }
 
   return (
