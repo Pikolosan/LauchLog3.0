@@ -120,7 +120,7 @@ app.post('/api/auth/register', [
       email,
       password: hashedPassword,
       name,
-      role: (email === 'admin@launchlog.com' || email === 'admin@launchlog.co') ? 'admin' : 'user', // Make admin emails admin
+      role: email === 'admin@launchlog.com' ? 'admin' : 'user', // Make admin@launchlog.com an admin
       createdAt: new Date()
     };
 
@@ -185,9 +185,9 @@ app.post('/api/auth/login', [
 
     // Generate JWT token
     const userId = user.id || user._id.toString();
-    // Auto-promote admin emails to admin role
+    // Auto-promote admin email to admin role
     let userRole = user.role || 'user';
-    if ((user.email === 'admin@launchlog.com' || user.email === 'admin@launchlog.co') && userRole !== 'admin') {
+    if (user.email === 'admin@launchlog.com' && userRole !== 'admin') {
       userRole = 'admin';
       // Update role in database
       try {
