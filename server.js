@@ -33,6 +33,14 @@ const authenticateToken = (req, res, next) => {
   });
 };
 
+// Admin middleware
+const requireAdmin = (req, res, next) => {
+  if (!req.user || req.user.role !== 'admin') {
+    return res.status(403).json({ error: 'Admin access required' });
+  }
+  next();
+};
+
 // Middleware
 app.use(cors());
 app.use(express.json());
@@ -112,6 +120,7 @@ app.post('/api/auth/register', [
       email,
       password: hashedPassword,
       name,
+      role: email === 'admin@launchlog.com' ? 'admin' : 'user', // Make admin@launchlog.com an admin
       createdAt: new Date()
     };
 
@@ -127,7 +136,7 @@ app.post('/api/auth/register', [
 
     // Generate JWT token
     const token = jwt.sign(
-      { userId, email, name },
+      { userId, email, name, role: newUser.role },
       JWT_SECRET,
       { expiresIn: '24h' }
     );
@@ -135,7 +144,7 @@ app.post('/api/auth/register', [
     res.status(201).json({
       message: 'User created successfully',
       token,
-      user: { id: userId, email, name }
+      user: { id: userId, email, name, role: newUser.role }
     });
   } catch (error) {
     console.error('Registration error:', error);
@@ -176,8 +185,9 @@ app.post('/api/auth/login', [
 
     // Generate JWT token
     const userId = user.id || user._id.toString();
+    const userRole = user.role || 'user';
     const token = jwt.sign(
-      { userId, email: user.email, name: user.name },
+      { userId, email: user.email, name: user.name, role: userRole },
       JWT_SECRET,
       { expiresIn: '24h' }
     );
@@ -185,11 +195,94 @@ app.post('/api/auth/login', [
     res.json({
       message: 'Login successful',
       token,
-      user: { id: userId, email: user.email, name: user.name }
+      user: { id: userId, email: user.email, name: user.name, role: userRole }
     });
   } catch (error) {
     console.error('Login error:', error);
     res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Admin Routes
+
+// Get all users (admin only)
+app.get('/api/admin/users', authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    if (isConnected) {
+      const users = await db.collection('users').find({}, { projection: { password: 0 } }).toArray();
+      res.json(users);
+    } else {
+      // Return fallback users without passwords
+      const safeUsers = fallbackUsers.map(user => {
+        const { password, ...safeUser } = user;
+        return safeUser;
+      });
+      res.json(safeUsers);
+    }
+  } catch (error) {
+    console.error('Error fetching users:', error);
+    res.status(500).json({ error: 'Failed to fetch users' });
+  }
+});
+
+// Get user stats (admin only)
+app.get('/api/admin/stats', authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    let totalUsers = 0;
+    let totalSessions = 0;
+    let totalTasks = 0;
+
+    if (isConnected) {
+      totalUsers = await db.collection('users').countDocuments();
+      const allUserData = await db.collection('userData').find({}).toArray();
+      totalSessions = allUserData.reduce((sum, user) => sum + (user.timerSessions?.length || 0), 0);
+      totalTasks = allUserData.reduce((sum, user) => {
+        const tasks = user.tasks || { todo: [], doing: [], done: [] };
+        return sum + tasks.todo.length + tasks.doing.length + tasks.done.length;
+      }, 0);
+    } else {
+      totalUsers = fallbackUsers.length;
+      Object.values(fallbackData).forEach(userData => {
+        if (userData.timerSessions) totalSessions += userData.timerSessions.length;
+        if (userData.tasks) {
+          totalTasks += userData.tasks.todo.length + userData.tasks.doing.length + userData.tasks.done.length;
+        }
+      });
+    }
+
+    res.json({
+      totalUsers,
+      totalSessions,
+      totalTasks,
+      systemStatus: isConnected ? 'MongoDB Connected' : 'Fallback Mode'
+    });
+  } catch (error) {
+    console.error('Error fetching admin stats:', error);
+    res.status(500).json({ error: 'Failed to fetch stats' });
+  }
+});
+
+// Delete user (admin only)
+app.delete('/api/admin/users/:userId', authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const { userId } = req.params;
+    
+    if (isConnected) {
+      await db.collection('users').deleteOne({ _id: new require('mongodb').ObjectId(userId) });
+      await db.collection('userData').deleteOne({ userId });
+    } else {
+      // Remove from fallback storage
+      const userIndex = fallbackUsers.findIndex(user => user.id === userId);
+      if (userIndex > -1) {
+        fallbackUsers.splice(userIndex, 1);
+      }
+      delete fallbackData[userId];
+    }
+    
+    res.json({ message: 'User deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting user:', error);
+    res.status(500).json({ error: 'Failed to delete user' });
   }
 });
 

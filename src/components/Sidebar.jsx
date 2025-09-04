@@ -61,6 +61,17 @@ const Sidebar = ({ activeSection, setActiveSection, dataHook, user, onLogout }) 
             <i className="fas fa-briefcase mr-3 w-5"></i>
             <span>Jobs Tracker</span>
           </button>
+          {user && user.role === 'admin' && (
+            <button
+              onClick={() => setActiveSection('admin')}
+              className={`nav-link flex items-center p-3 rounded-lg w-full text-left ${
+                activeSection === 'admin' ? 'active-nav' : 'hover:bg-gray-800'
+              }`}
+            >
+              <i className="fas fa-user-shield mr-3 w-5"></i>
+              <span>Admin Panel</span>
+            </button>
+          )}
         </nav>
         
         <div className="mt-auto pt-6 border-t border-divider-lines space-y-3">

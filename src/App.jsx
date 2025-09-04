@@ -7,6 +7,7 @@ import Plan from './components/Plan'
 import Jobs from './components/Jobs'
 import Cover from './components/Cover'
 import Auth from './components/Auth'
+import Admin from './components/Admin'
 
 function App() {
   const [showCover, setShowCover] = useState(true)
@@ -56,6 +57,8 @@ function App() {
         return <Plan dataHook={dataHook} />
       case 'jobs':
         return <Jobs dataHook={dataHook} />
+      case 'admin':
+        return <Admin />
       default:
         return <Dashboard dataHook={dataHook} />
     }

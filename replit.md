@@ -23,7 +23,9 @@ Preferred communication style: Simple, everyday language.
 ### Backend Architecture
 - **Framework**: Express.js server providing REST API endpoints
 - **Database**: MongoDB support with graceful fallback to in-memory storage when no connection string is provided
-- **API Endpoints**: RESTful API for user data, timer sessions, tasks, jobs, and dashboard metrics
+- **Authentication**: JWT-based authentication with bcrypt password hashing and role-based access control
+- **API Endpoints**: RESTful API for user data, timer sessions, tasks, jobs, dashboard metrics, and admin functionality
+- **Admin Features**: Comprehensive admin panel with user management, system statistics, and administrative controls
 - **Development Server**: Runs on port 3001 with CORS enabled for frontend communication
 
 ### Data Visualization
@@ -61,3 +63,22 @@ Preferred communication style: Simple, everyday language.
 - **Static Assets**: Vite development server for serving application assets
 
 The architecture prioritizes user experience with smooth animations, responsive design, and rich data visualization capabilities while maintaining a modern, professional aesthetic suitable for career tracking applications.
+
+## Admin System
+
+### Admin User Creation
+- **Default Admin**: Any user registering with `admin@launchlog.com` automatically receives admin privileges
+- **Role-Based Access**: Users have either 'admin' or 'user' roles stored in the database
+- **JWT Integration**: Admin role is included in authentication tokens for secure access control
+
+### Admin Features
+- **User Management Dashboard**: Complete overview of all registered users with creation dates and roles
+- **System Statistics**: Real-time metrics showing total users, focus sessions, tasks, and system status
+- **User Administration**: Ability to view user details and delete non-admin users
+- **Protected Routes**: Admin-only API endpoints secured with middleware authentication
+- **Admin Panel Access**: Dedicated admin section in the sidebar navigation (visible only to admin users)
+
+### Admin Security
+- **Middleware Protection**: All admin routes protected by authentication and role verification middleware
+- **Safe User Display**: User passwords are never exposed in admin user listings
+- **Admin Preservation**: Admin users cannot be deleted through the admin interface for security
