@@ -1,0 +1,107 @@
+:root {
+  --neon-blue: #00f3ff;
+  --neon-purple: #9d4edd;
+  --dark-bg: #121212;
+  --card-bg: #1e1e1e;
+}
+
+body {
+  background-color: var(--dark-bg);
+  color: #f0f0f0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  overflow-x: hidden;
+  margin: 0;
+  padding: 0;
+}
+
+.sidebar {
+  background-color: rgba(30, 30, 30, 0.9);
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+}
+
+.active-nav {
+  border-left: 3px solid var(--neon-blue);
+  background-color: rgba(0, 243, 255, 0.1);
+}
+
+.card {
+  background-color: var(--card-bg);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+  border-color: var(--neon-blue);
+}
+
+.neon-text {
+  color: var(--neon-blue);
+  text-shadow: 0 0 5px rgba(0, 243, 255, 0.5);
+}
+
+.neon-border {
+  border-color: var(--neon-blue);
+  box-shadow: 0 0 5px rgba(0, 243, 255, 0.5);
+}
+
+.btn-neon {
+  background: linear-gradient(45deg, var(--neon-blue), var(--neon-purple));
+  border: none;
+  color: white;
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+.btn-neon:hover {
+  opacity: 0.9;
+  transform: scale(1.05);
+  box-shadow: 0 0 15px rgba(0, 243, 255, 0.7);
+}
+
+/* Kanban Board */
+.kanban-column {
+  background-color: rgba(30, 30, 30, 0.8);
+  border-radius: 8px;
+  min-height: 300px;
+}
+
+.task-card {
+  cursor: grab;
+}
+
+.task-card:active {
+  cursor: grabbing;
+}
+
+/* Timer Styles */
+.timer-display {
+  font-size: 3.5rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  font-family: 'Courier New', monospace;
+}
+
+/* Page transition */
+.content-section {
+  transition: opacity 0.3s ease-in-out;
+}
+
+/* Animated gradient for welcome text */
+.welcome-gradient {
+  background: linear-gradient(-45deg, var(--neon-blue), var(--neon-purple), #4cc9f0, #7209b7);
+  background-size: 300% 300%;
+  animation: gradient 8s ease infinite;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+@keyframes gradient {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
