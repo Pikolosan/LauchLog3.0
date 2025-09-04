@@ -261,53 +261,93 @@ app.get('/api/user-data', authenticateToken, async (req, res) => {
 });
 
 // Save timer session
-app.post('/api/timer-sessions', async (req, res) => {
+app.post('/api/timer-sessions', authenticateToken, async (req, res) => {
   try {
     const { session } = req.body;
+    const userId = req.user.userId;
     
     if (!isConnected) {
-      fallbackData.timerSessions.push(session);
+      if (!fallbackData[userId]) {
+        fallbackData[userId] = { 
+          userId, 
+          timerSessions: [], 
+          tasks: { todo: [], doing: [], done: [] }, 
+          jobs: [], 
+          dashboardData: { totalHours: 0, completedTasks: 0, activeApplications: 0, sessionsThisWeek: 0 } 
+        };
+      }
+      fallbackData[userId].timerSessions.push(session);
       return res.json({ success: true, fallback: true });
     }
 
     await db.collection('userData').updateOne(
-      { userId: 'default' },
+      { userId },
       { 
         $push: { timerSessions: session },
-        $setOnInsert: { userId: 'default' }
+        $setOnInsert: { userId }
       },
       { upsert: true }
     );
     res.json({ success: true });
   } catch (error) {
     console.error('Error saving timer session:', error);
-    fallbackData.timerSessions.push(session);
+    const userId = req.user.userId;
+    if (!fallbackData[userId]) {
+      fallbackData[userId] = { 
+        userId, 
+        timerSessions: [], 
+        tasks: { todo: [], doing: [], done: [] }, 
+        jobs: [], 
+        dashboardData: { totalHours: 0, completedTasks: 0, activeApplications: 0, sessionsThisWeek: 0 } 
+      };
+    }
+    fallbackData[userId].timerSessions.push(session);
     res.json({ success: true, fallback: true });
   }
 });
 
 // Update tasks
-app.put('/api/tasks', async (req, res) => {
+app.put('/api/tasks', authenticateToken, async (req, res) => {
   try {
     const { tasks } = req.body;
+    const userId = req.user.userId;
     
     if (!isConnected) {
-      fallbackData.tasks = tasks;
+      if (!fallbackData[userId]) {
+        fallbackData[userId] = { 
+          userId, 
+          timerSessions: [], 
+          tasks: { todo: [], doing: [], done: [] }, 
+          jobs: [], 
+          dashboardData: { totalHours: 0, completedTasks: 0, activeApplications: 0, sessionsThisWeek: 0 } 
+        };
+      }
+      fallbackData[userId].tasks = tasks;
       return res.json({ success: true, fallback: true });
     }
 
     await db.collection('userData').updateOne(
-      { userId: 'default' },
+      { userId },
       { 
         $set: { tasks },
-        $setOnInsert: { userId: 'default' }
+        $setOnInsert: { userId }
       },
       { upsert: true }
     );
     res.json({ success: true });
   } catch (error) {
     console.error('Error updating tasks:', error);
-    fallbackData.tasks = tasks;
+    const userId = req.user.userId;
+    if (!fallbackData[userId]) {
+      fallbackData[userId] = { 
+        userId, 
+        timerSessions: [], 
+        tasks: { todo: [], doing: [], done: [] }, 
+        jobs: [], 
+        dashboardData: { totalHours: 0, completedTasks: 0, activeApplications: 0, sessionsThisWeek: 0 } 
+      };
+    }
+    fallbackData[userId].tasks = tasks;
     res.json({ success: true, fallback: true });
   }
 });

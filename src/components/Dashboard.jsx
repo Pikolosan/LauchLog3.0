@@ -106,7 +106,7 @@ const Dashboard = ({ dataHook }) => {
   }
 
   const renderActivityHeatmap = () => {
-    const sessions = JSON.parse(localStorage.getItem('placeTrackSessions')) || []
+    const sessions = dataHook.data.timerSessions || []
     
     const dayTotals = {}
     sessions.forEach(session => {
