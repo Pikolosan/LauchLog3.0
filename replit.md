@@ -18,6 +18,13 @@ Preferred communication style: Simple, everyday language.
 - **UI Components**: Custom dark theme with neon blue (#00f3ff) and purple (#9d4edd) accents
 - **Icons**: Font Awesome for consistent iconography
 - **Build System**: Vite configured for hot module replacement and optimized production builds
+- **Development Server**: Configured to run on port 5000 with proxy to backend API on port 3001
+
+### Backend Architecture
+- **Framework**: Express.js server providing REST API endpoints
+- **Database**: MongoDB support with graceful fallback to in-memory storage when no connection string is provided
+- **API Endpoints**: RESTful API for user data, timer sessions, tasks, jobs, and dashboard metrics
+- **Development Server**: Runs on port 3001 with CORS enabled for frontend communication
 
 ### Data Visualization
 - **Charts**: Chart.js with React integration via react-chartjs-2 for displaying career progress metrics

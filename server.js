@@ -18,15 +18,27 @@ app.use(express.json());
 // MongoDB connection
 let db;
 let isConnected = false;
-const client = new MongoClient(process.env.MONGODB_CONNECTION_STRING, {
-  serverApi: {
-    version: '1',
-    strict: true,
-    deprecationErrors: true,
-  }
-});
+let client = null;
+
+// Only create MongoDB client if connection string is provided
+if (process.env.MONGODB_CONNECTION_STRING) {
+  client = new MongoClient(process.env.MONGODB_CONNECTION_STRING, {
+    serverApi: {
+      version: '1',
+      strict: true,
+      deprecationErrors: true,
+    }
+  });
+}
 
 async function connectToDatabase() {
+  if (!client) {
+    console.log('⚠️ No MongoDB connection string provided - running in fallback mode');
+    console.log('⚠️ Data will not persist between server restarts');
+    isConnected = false;
+    return;
+  }
+
   try {
     await client.connect();
     await client.db('admin').command({ ping: 1 });
