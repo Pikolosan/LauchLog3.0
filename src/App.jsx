@@ -4,9 +4,15 @@ import Dashboard from './components/Dashboard'
 import Timer from './components/Timer'
 import Plan from './components/Plan'
 import Jobs from './components/Jobs'
+import Cover from './components/Cover'
 
 function App() {
+  const [showCover, setShowCover] = useState(true)
   const [activeSection, setActiveSection] = useState('dashboard')
+
+  const handleEnterApp = () => {
+    setShowCover(false)
+  }
 
   const renderActiveSection = () => {
     switch (activeSection) {
@@ -19,6 +25,10 @@ function App() {
       default:
         return <Dashboard />
     }
+  }
+
+  if (showCover) {
+    return <Cover onEnter={handleEnterApp} />
   }
 
   return (
