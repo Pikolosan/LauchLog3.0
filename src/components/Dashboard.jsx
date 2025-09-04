@@ -4,7 +4,7 @@ import { Doughnut } from 'react-chartjs-2'
 
 ChartJS.register(ArcElement, Tooltip, Legend)
 
-const Dashboard = () => {
+const Dashboard = ({ dataHook }) => {
   const [stats, setStats] = useState({
     totalTimeFocused: '0 hours',
     daysFocused: '0 days',
@@ -21,28 +21,29 @@ const Dashboard = () => {
   })
 
   useEffect(() => {
-    const sessions = JSON.parse(localStorage.getItem('placeTrackSessions')) || []
-    const jobs = JSON.parse(localStorage.getItem('placeTrackJobs')) || []
-    const totalMinutes = sessions.reduce((total, session) => total + (session.duration || 0), 0)
-    const totalHours = Math.floor(totalMinutes / 60)
-    const uniqueDays = new Set(sessions.map(session => session.date?.split('T')[0])).size
-    const interviews = jobs.filter(job => job.status === 'Interview').length
+    if (dataHook && dataHook.data) {
+      const { timerSessions, jobs } = dataHook.data
+      const totalMinutes = timerSessions.reduce((total, session) => total + (session.duration || 0), 0)
+      const totalHours = Math.floor(totalMinutes / 60)
+      const uniqueDays = new Set(timerSessions.map(session => session.date?.split('T')[0])).size
+      const interviews = jobs.filter(job => job.status === 'Interview').length
 
-    setStats(prev => ({
-      ...prev,
-      totalTimeFocused: `${totalHours} hours`,
-      daysFocused: `${uniqueDays} days`,
-      jobsAppliedCount: `${jobs.length} applications`,
-      interviewCount: interviews.toString()
-    }))
-  }, [])
+      setStats(prev => ({
+        ...prev,
+        totalTimeFocused: `${totalHours} hours`,
+        daysFocused: `${uniqueDays} days`,
+        jobsAppliedCount: `${jobs.length} applications`,
+        interviewCount: interviews.toString()
+      }))
+    }
+  }, [dataHook?.data])
 
   const renderSubjectChart = () => {
-    const sessions = JSON.parse(localStorage.getItem('placeTrackSessions')) || []
+    const sessions = dataHook?.data?.timerSessions || []
     
     if (sessions.length === 0) {
       return (
-        <div className="flex items-center justify-center h-full text-gray-500">
+        <div className="flex items-center justify-center h-full text-secondary-text">
           No focus sessions recorded yet
         </div>
       )

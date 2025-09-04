@@ -1,10 +1,18 @@
-const Sidebar = ({ activeSection, setActiveSection }) => {
-  const handleResetData = () => {
+const Sidebar = ({ activeSection, setActiveSection, dataHook }) => {
+  const handleResetData = async () => {
     if (window.confirm('Are you sure you want to reset all data? This action cannot be undone.')) {
-      localStorage.removeItem('placeTrackSessions')
-      localStorage.removeItem('placeTrackTasks')
-      localStorage.removeItem('placeTrackJobs')
-      window.location.reload()
+      try {
+        if (dataHook) {
+          await dataHook.resetAllData()
+        } else {
+          localStorage.clear()
+        }
+        window.location.reload()
+      } catch (error) {
+        console.error('Failed to reset data:', error)
+        localStorage.clear()
+        window.location.reload()
+      }
     }
   }
 

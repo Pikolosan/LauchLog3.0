@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 
-const Timer = () => {
+const Timer = ({ dataHook }) => {
   const [timerMode, setTimerMode] = useState('pomodoro')
   const [timeLeft, setTimeLeft] = useState(25 * 60)
   const [isRunning, setIsRunning] = useState(false)
@@ -14,9 +14,10 @@ const Timer = () => {
   const timerStartTimeRef = useRef(null)
 
   useEffect(() => {
-    const savedSessions = JSON.parse(localStorage.getItem('placeTrackSessions')) || []
-    setSessions(savedSessions.slice(0, 10))
-  }, [])
+    if (dataHook && dataHook.data) {
+      setSessions(dataHook.data.timerSessions.slice(0, 10))
+    }
+  }, [dataHook?.data])
 
   useEffect(() => {
     if (timerMode === 'pomodoro') {
@@ -48,8 +49,8 @@ const Timer = () => {
     return 0
   }
 
-  const saveSession = () => {
-    if (!selectedSubject) return
+  const saveSession = async () => {
+    if (!selectedSubject || !dataHook) return
     
     let durationInSeconds
     if (timerMode === 'pomodoro' && !isBreakTime) {
@@ -72,11 +73,12 @@ const Timer = () => {
       date: new Date().toISOString()
     }
 
-    const savedSessions = JSON.parse(localStorage.getItem('placeTrackSessions')) || []
-    savedSessions.push(session)
-    localStorage.setItem('placeTrackSessions', JSON.stringify(savedSessions))
-    
-    setSessions(savedSessions.slice(-10).reverse())
+    try {
+      await dataHook.saveTimerSession(session)
+      setSessions(prev => [session, ...prev.slice(0, 9)])
+    } catch (error) {
+      console.error('Failed to save session:', error)
+    }
   }
 
   const startTimer = () => {
