@@ -25,11 +25,12 @@ const Plan = () => {
         try {
           sortable.destroy()
         } catch (e) {
+          // Ignore destroy errors
         }
       })
       sortablesRef.current = []
     }
-  }, [])
+  }, [tasks])
 
   const loadTasks = () => {
     const savedTasks = JSON.parse(localStorage.getItem('placeTrackTasks')) || { todo: [], inProgress: [], completed: [] }
@@ -42,10 +43,12 @@ const Plan = () => {
   }
 
   const initSortable = () => {
+    // Clean up existing sortables
     sortablesRef.current.forEach(sortable => {
       try {
         sortable.destroy()
       } catch (e) {
+        // Ignore destroy errors
       }
     })
     sortablesRef.current = []
@@ -62,23 +65,30 @@ const Plan = () => {
           group: 'tasks',
           animation: 150,
           ghostClass: 'bg-gray-700',
-          forceFallback: true,
-          fallbackClass: 'bg-gray-600',
+          chosenClass: 'bg-gray-600',
+          dragClass: 'bg-gray-500',
+          // Prevent SortableJS from manipulating DOM directly
+          sort: false,
+          // Use clone instead of moving elements
           onStart: (evt) => {
-            evt.item.style.display = 'none'
+            evt.item.style.opacity = '0.5'
           },
           onEnd: (evt) => {
-            evt.item.style.display = ''
+            evt.item.style.opacity = ''
             
             const taskId = evt.item.getAttribute('data-id')
             const fromColumn = getColumnFromElement(evt.from)
             const toColumn = getColumnFromElement(evt.to)
             
-            setTimeout(() => {
-              if (fromColumn !== toColumn && taskId) {
-                moveTask(taskId, fromColumn, toColumn)
+            // Prevent default SortableJS behavior and handle with React
+            if (fromColumn !== toColumn && taskId) {
+              // Move back the DOM element to prevent conflicts
+              if (evt.from !== evt.to) {
+                evt.from.insertBefore(evt.item, evt.from.children[evt.oldIndex])
               }
-            }, 10)
+              // Let React handle the state change
+              moveTask(taskId, fromColumn, toColumn)
+            }
           }
         })
         sortablesRef.current.push(sortable)
@@ -94,14 +104,16 @@ const Plan = () => {
   }
 
   const moveTask = (taskId, fromColumn, toColumn) => {
+    if (fromColumn === toColumn) return
+    
     setTasks(currentTasks => {
       const newTasks = { ...currentTasks }
       const taskIndex = newTasks[fromColumn].findIndex(task => task.id === taskId)
       
       if (taskIndex !== -1) {
-        const task = newTasks[fromColumn][taskIndex]
-        newTasks[fromColumn].splice(taskIndex, 1)
-        newTasks[toColumn].push(task)
+        const task = { ...newTasks[fromColumn][taskIndex] }
+        newTasks[fromColumn] = newTasks[fromColumn].filter(t => t.id !== taskId)
+        newTasks[toColumn] = [...newTasks[toColumn], task]
 
         localStorage.setItem('placeTrackTasks', JSON.stringify(newTasks))
         return newTasks
