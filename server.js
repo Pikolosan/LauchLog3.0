@@ -594,8 +594,8 @@ app.delete('/api/reset', async (req, res) => {
 
 // Start server
 connectToDatabase().then(() => {
-  app.listen(PORT, '0.0.0.0', () => {
-    console.log(`🚀 Server running on port ${PORT}`);
+  app.listen(PORT, 'localhost', () => {
+    console.log(`🚀 Server running on localhost:${PORT}`);
   });
 });
 
