@@ -1,0 +1,1575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LaunchLog - Like a launchpad for your career, logs all progress.</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Sortable.js for drag and drop -->
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+  <style id="app-style">
+    :root {
+      --neon-blue: #00f3ff;
+      --neon-purple: #9d4edd;
+      --dark-bg: #121212;
+      --card-bg: #1e1e1e;
+    }
+
+    body {
+      background-color: var(--dark-bg);
+      color: #f0f0f0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      overflow-x: hidden;
+    }
+
+    .sidebar {
+      background-color: rgba(30, 30, 30, 0.9);
+      border-right: 1px solid rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+    }
+
+    .active-nav {
+      border-left: 3px solid var(--neon-blue);
+      background-color: rgba(0, 243, 255, 0.1);
+    }
+
+    .card {
+      background-color: var(--card-bg);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+      border-color: var(--neon-blue);
+    }
+
+    .neon-text {
+      color: var(--neon-blue);
+      text-shadow: 0 0 5px rgba(0, 243, 255, 0.5);
+    }
+
+    .neon-border {
+      border-color: var(--neon-blue);
+      box-shadow: 0 0 5px rgba(0, 243, 255, 0.5);
+    }
+
+    .btn-neon {
+      background: linear-gradient(45deg, var(--neon-blue), var(--neon-purple));
+      border: none;
+      color: white;
+      font-weight: bold;
+      transition: all 0.3s ease;
+    }
+
+    .btn-neon:hover {
+      opacity: 0.9;
+      transform: scale(1.05);
+      box-shadow: 0 0 15px rgba(0, 243, 255, 0.7);
+    }
+
+    /* Kanban Board */
+    .kanban-column {
+      background-color: rgba(30, 30, 30, 0.8);
+      border-radius: 8px;
+      min-height: 300px;
+    }
+
+    .task-card {
+      cursor: grab;
+    }
+
+    .task-card:active {
+      cursor: grabbing;
+    }
+
+    /* Timer Styles */
+    .timer-display {
+      font-size: 3.5rem;
+      font-weight: 700;
+      letter-spacing: 2px;
+      font-family: 'Courier New', monospace;
+    }
+
+    /* Page transition */
+    .content-section {
+      transition: opacity 0.3s ease-in-out;
+    }
+
+    /* Animated gradient for welcome text */
+    .welcome-gradient {
+      background: linear-gradient(-45deg, var(--neon-blue), var(--neon-purple), #4cc9f0, #7209b7);
+      background-size: 300% 300%;
+      animation: gradient 8s ease infinite;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    @keyframes gradient {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+  </style>
+</head>
+<body class="flex h-screen">
+  <!-- Sidebar Navigation -->
+  <aside class="sidebar w-64 h-screent fixed top-0 left-0 overflow-y-auto">
+    <div class="p-4 flex flex-col h-full">
+      <div class="mb-8">
+        <h1 class="text-2xl font-bold mb-1 neon-text">LaunchLog</h1>
+        <p class="text-sm text-gray-400">Like a launchpad for your career, logs all progress.</p>
+      </div>
+      
+      <nav class="space-y-2 flex-grow">
+        <a href="javascript:void(0)" class="nav-link flex items-center p-3 rounded-lg active-nav" data-page="dashboard">
+          <i class="fas fa-chart-line mr-3 w-5"></i>
+          <span>Dashboard</span>
+        </a>
+        <a href="javascript:void(0)" class="nav-link flex items-center p-3 rounded-lg hover:bg-gray-800" data-page="timer">
+          <i class="fas fa-clock mr-3 w-5"></i>
+          <span>Timer</span>
+        </a>
+        <a href="javascript:void(0)" class="nav-link flex items-center p-3 rounded-lg hover:bg-gray-800" data-page="plan">
+          <i class="fas fa-tasks mr-3 w-5"></i>
+          <span>Plan</span>
+        </a>
+        <a href="javascript:void(0)" class="nav-link flex items-center p-3 rounded-lg hover:bg-gray-800" data-page="jobs">
+          <i class="fas fa-briefcase mr-3 w-5"></i>
+          <span>Jobs Tracker</span>
+        </a>
+      </nav>
+      
+      <div class="mt-auto pt-4 border-t border-gray-700">
+        <button id="resetDataBtn" class="flex items-center p-3 text-red-400 hover:text-red-300 w-full">
+          <i class="fas fa-trash-alt mr-3"></i>
+          <span>Reset All Data</span>
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Content Area -->
+  <main class="flex-1 ml-64 p-8 overflow-y-auto">
+    <!-- Dashboard Section -->
+    <section id="dashboard" class="content-section">
+      <h2 class="text-3xl font-bold mb-6 welcome-gradient">Dashboard Overview</h2>
+      
+      <!-- Stats Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+        <div class="card p-5 rounded-lg">
+          <h3 class="text-gray-400 text-sm mb-1">Total Time Focused</h3>
+          <p class="text-2xl font-bold" id="totalTimeFocused">0 hours</p>
+          <div class="mt-2 text-xs text-gray-500">
+            <i class="fas fa-arrow-up text-green-400"></i>
+            <span>Since you started tracking</span>
+          </div>
+        </div>
+
+        <div class="card p-5 rounded-lg">
+          <h3 class="text-gray-400 text-sm mb-1">Days Focused</h3>
+          <p class="text-2xl font-bold" id="daysFocused">0 days</p>
+          <div class="mt-2 text-xs text-gray-500">
+            <i class="fas fa-calendar-alt"></i>
+            <span>Total days with activity</span>
+          </div>
+        </div>
+
+        <div class="card p-5 rounded-lg">
+          <h3 class="text-gray-400 text-sm mb-1">Best Day</h3>
+          <p class="text-2xl font-bold" id="bestDay">0 hours</p>
+          <div class="mt-2 text-xs text-gray-500">
+            <i class="fas fa-trophy text-yellow-400"></i>
+            <span id="bestDayDate">Not enough data</span>
+          </div>
+        </div>
+
+        <div class="card p-5 rounded-lg">
+          <h3 class="text-gray-400 text-sm mb-1">Current Streak</h3>
+          <p class="text-2xl font-bold" id="currentStreak">0 days</p>
+          <div class="mt-2 text-xs text-gray-500">
+            <i class="fas fa-fire text-orange-400"></i>
+            <span>Max: <span id="maxStreak">0</span> days</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Additional Stats Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
+        <div class="card p-5 rounded-lg">
+          <h3 class="text-gray-400 text-sm mb-1">Best Week</h3>
+          <p class="text-2xl font-bold" id="bestWeek">0 hours</p>
+          <div class="mt-2 text-xs text-gray-500">
+            <i class="fas fa-calendar-week text-blue-400"></i>
+            <span id="bestWeekDate">Not enough data</span>
+          </div>
+        </div>
+
+        <div class="card p-5 rounded-lg">
+          <h3 class="text-gray-400 text-sm mb-1">Best Month</h3>
+          <p class="text-2xl font-bold" id="bestMonth">0 hours</p>
+          <div class="mt-2 text-xs text-gray-500">
+            <i class="fas fa-calendar-alt text-purple-400"></i>
+            <span id="bestMonthDate">Not enough data</span>
+          </div>
+        </div>
+
+        <div class="card p-5 rounded-lg">
+          <h3 class="text-gray-400 text-sm mb-1">Jobs Applied</h3>
+          <p class="text-2xl font-bold" id="jobsAppliedCount">0 applications</p>
+          <div class="mt-2 text-xs text-gray-500">
+            <span id="interviewCount">0</span> interviews scheduled
+          </div>
+        </div>
+      </div>
+
+      <!-- Charts Row -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-8">
+        <!-- Subject Distribution Pie Chart -->
+        <div class="card p-5 rounded-lg">
+          <h3 class="text-gray-400 text-sm mb-3">Time Distribution by Subject</h3>
+          <div class="h-64">
+            <canvas id="subjectsPieChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Activity Heatmap -->
+        <div class="card p-5 rounded-lg">
+          <h3 class="text-gray-400 text-sm mb-3">Focus Activity Heatmap</h3>
+          <div class="h-64 flex items-center justify-center">
+            <div id="activityHeatmap" class="grid grid-cols-7 gap-1">
+              <!-- Heatmap cells will be generated by JS -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Timer Section -->
+    <section id="timer" class="content-section hidden">
+      <h2 class="text-3xl font-bold mb-6">Focus Timer</h2>
+      
+      <div class="flex flex-col md:flex-row gap-8">
+        <!-- Timer Card -->
+        <div class="card p-6 rounded-lg flex-1">
+          <div class="mb-4">
+            <label for="subjectSelect" class="block text-sm font-medium text-gray-400 mb-2">Select Subject</label>
+            <select id="subjectSelect" class="w-full bg-gray-800 border border-gray-700 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <option value="">Select a subject...</option>
+              <option value="Data Structures">Data Structures</option>
+              <option value="Algorithms">Algorithms</option>
+              <option value="System Design">System Design</option>
+              <option value="Web Development">Web Development</option>
+              <option value="Database">Database</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+
+          <div class="mb-6">
+            <label class="block text-sm font-medium text-gray-400 mb-2">Timer Mode</label>
+            <div class="flex space-x-4">
+              <button id="pomodoroBtn" class="flex-1 bg-gray-800 hover:bg-gray-700 py-2 px-4 rounded-md border border-gray-700 active-timer-btn">
+                <i class="fas fa-hourglass-half mr-2"></i> Pomodoro
+              </button>
+              <button id="stopwatchBtn" class="flex-1 bg-gray-800 hover:bg-gray-700 py-2 px-4 rounded-md border border-gray-700">
+                <i class="fas fa-stopwatch mr-2"></i> Stopwatch
+              </button>
+            </div>
+          </div>
+
+          <!-- Timer Display -->
+          <div class="flex flex-col items-center mb-8">
+            <div class="timer-display mb-2" id="timerDisplay">25:00</div>
+            <div id="timerStatus" class="text-sm text-gray-400 mb-4">Focus Time</div>
+            <div id="timerProgress" class="w-full bg-gray-800 rounded-full h-2.5 mb-6">
+              <div id="timerProgressBar" class="bg-gradient-to-r from-blue-500 to-purple-500 h-2.5 rounded-full" style="width: 0%"></div>
+            </div>
+          </div>
+
+          <!-- Timer Controls -->
+          <div class="flex justify-center space-x-4">
+            <button id="startBtn" class="btn-neon px-6 py-3 rounded-lg">
+              <i class="fas fa-play mr-2"></i> Start
+            </button>
+            <button id="pauseBtn" class="px-6 py-3 rounded-lg bg-gray-700 hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+              <i class="fas fa-pause mr-2"></i> Pause
+            </button>
+            <button id="resetBtn" class="px-6 py-3 rounded-lg bg-gray-700 hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+              <i class="fas fa-redo mr-2"></i> Reset
+            </button>
+          </div>
+        </div>
+
+        <!-- Session History -->
+        <div class="card p-6 rounded-lg flex-1">
+          <h3 class="text-xl font-semibold mb-4">Recent Sessions</h3>
+          
+          <div class="overflow-y-auto max-h-96">
+            <div id="sessionsContainer" class="space-y-3">
+              <!-- Sessions will be populated by JavaScript -->
+              <div class="text-gray-500 text-center py-8">No sessions recorded yet</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Plan (Kanban) Section -->
+    <section id="plan" class="content-section hidden">
+      <h2 class="text-3xl font-bold mb-6">Task Planner</h2>
+      
+      <!-- Add New Task Form -->
+      <div class="card p-6 rounded-lg mb-8">
+        <h3 class="text-xl font-semibold mb-4">Add New Task</h3>
+        
+        <form id="taskForm" class="space-y-4">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label for="taskTitle" class="block text-sm font-medium text-gray-400 mb-1">Title</label>
+              <input type="text" id="taskTitle" class="w-full bg-gray-800 border border-gray-700 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Task title" required>
+            </div>
+            
+            <div>
+              <label for="taskDueDate" class="block text-sm font-medium text-gray-400 mb-1">Due Date</label>
+              <input type="date" id="taskDueDate" class="w-full bg-gray-800 border border-gray-700 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+          </div>
+          
+          <div>
+            <label for="taskDescription" class="block text-sm font-medium text-gray-400 mb-1">Description</label>
+            <textarea id="taskDescription" rows="2" class="w-full bg-gray-800 border border-gray-700 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Task description"></textarea>
+          </div>
+          
+          <div class="flex justify-end">
+            <button type="submit" class="btn-neon px-6 py-2 rounded-lg">
+              <i class="fas fa-plus mr-2"></i> Add Task
+            </button>
+          </div>
+        </form>
+      </div>
+      
+      <!-- Kanban Board -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- To Do Column -->
+        <div class="kanban-column p-4">
+          <h3 class="text-xl font-semibold mb-4 flex items-center">
+            <i class="fas fa-list-ul mr-2 text-blue-400"></i>
+            To Do
+            <span id="todoCount" class="ml-2 text-sm bg-gray-800 px-2 py-1 rounded-full">0</span>
+          </h3>
+          
+          <div id="todoTasks" class="space-y-3 min-h-[200px]">
+            <!-- Tasks will be populated by JavaScript -->
+          </div>
+        </div>
+        
+        <!-- In Progress Column -->
+        <div class="kanban-column p-4">
+          <h3 class="text-xl font-semibold mb-4 flex items-center">
+            <i class="fas fa-spinner mr-2 text-yellow-400"></i>
+            In Progress
+            <span id="progressCount" class="ml-2 text-sm bg-gray-800 px-2 py-1 rounded-full">0</span>
+          </h3>
+          
+          <div id="progressTasks" class="space-y-3 min-h-[200px]">
+            <!-- Tasks will be populated by JavaScript -->
+          </div>
+        </div>
+        
+        <!-- Completed Column -->
+        <div class="kanban-column p-4">
+          <h3 class="text-xl font-semibold mb-4 flex items-center">
+            <i class="fas fa-check-circle mr-2 text-green-400"></i>
+            Completed
+            <span id="completedCount" class="ml-2 text-sm bg-gray-800 px-2 py-1 rounded-full">0</span>
+          </h3>
+          
+          <div id="completedTasks" class="space-y-3 min-h-[200px]">
+            <!-- Tasks will be populated by JavaScript -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Jobs Tracker Section -->
+    <section id="jobs" class="content-section hidden">
+      <h2 class="text-3xl font-bold mb-6">Job Applications Tracker</h2>
+      
+      <!-- Add New Job Form -->
+      <div class="card p-6 rounded-lg mb-8">
+        <h3 class="text-xl font-semibold mb-4">Add New Job Application</h3>
+        
+        <form id="jobForm" class="space-y-4">
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div>
+              <label for="jobTitle" class="block text-sm font-medium text-gray-400 mb-1">Job Title</label>
+              <input type="text" id="jobTitle" class="w-full bg-gray-800 border border-gray-700 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Software Engineer" required>
+            </div>
+            
+            <div>
+              <label for="company" class="block text-sm font-medium text-gray-400 mb-1">Company</label>
+              <input type="text" id="company" class="w-full bg-gray-800 border border-gray-700 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Google" required>
+            </div>
+            
+            <div>
+              <label for="dateApplied" class="block text-sm font-medium text-gray-400 mb-1">Date Applied</label>
+              <input type="date" id="dateApplied" class="w-full bg-gray-800 border border-gray-700 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+            </div>
+            
+            <div>
+              <label for="jobStatus" class="block text-sm font-medium text-gray-400 mb-1">Status</label>
+              <select id="jobStatus" class="w-full bg-gray-800 border border-gray-700 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                <option value="Applied">Applied</option>
+                <option value="Interview">Interview Scheduled</option>
+                <option value="Rejected">Rejected</option>
+                <option value="Placed">Placed</option>
+              </select>
+            </div>
+            
+            <div class="md:col-span-2">
+              <label for="jobNotes" class="block text-sm font-medium text-gray-400 mb-1">Notes</label>
+              <textarea id="jobNotes" rows="1" class="w-full bg-gray-800 border border-gray-700 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Any additional notes..."></textarea>
+            </div>
+          </div>
+          
+          <div class="flex justify-end">
+            <button type="submit" class="btn-neon px-6 py-2 rounded-lg">
+              <i class="fas fa-plus mr-2"></i> Add Job
+            </button>
+          </div>
+        </form>
+      </div>
+      
+      <!-- Filter Options -->
+      <div class="mb-6 flex flex-wrap gap-3">
+        <div>
+          <label for="statusFilter" class="block text-sm font-medium text-gray-400 mb-1">Filter by Status</label>
+          <select id="statusFilter" class="bg-gray-800 border border-gray-700 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <option value="All">All Status</option>
+            <option value="Applied">Applied</option>
+            <option value="Interview">Interview</option>
+            <option value="Rejected">Rejected</option>
+            <option value="Placed">Placed</option>
+          </select>
+        </div>
+        
+        <div>
+          <label for="sortBy" class="block text-sm font-medium text-gray-400 mb-1">Sort by</label>
+          <select id="sortBy" class="bg-gray-800 border border-gray-700 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <option value="dateDesc">Date (Newest)</option>
+            <option value="dateAsc">Date (Oldest)</option>
+            <option value="company">Company</option>
+            <option value="status">Status</option>
+          </select>
+        </div>
+      </div>
+      
+      <!-- Jobs List -->
+      <div class="card rounded-lg overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead class="bg-gray-800 text-left">
+              <tr>
+                <th class="px-6 py-4">Job Title</th>
+                <th class="px-6 py-4">Company</th>
+                <th class="px-6 py-4">Date Applied</th>
+                <th class="px-6 py-4">Status</th>
+                <th class="px-6 py-4">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="jobsList">
+              <!-- Jobs will be populated by JavaScript -->
+              <tr>
+                <td colspan="5" class="px-6 py-10 text-center text-gray-500">
+                  No job applications added yet
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Confirmation Modal -->
+    <div id="confirmationModal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 hidden">
+      <div class="bg-gray-900 p-8 rounded-lg max-w-md w-full">
+        <h3 class="text-xl font-bold mb-4">Confirm Reset</h3>
+        <p class="mb-6">Are you sure you want to reset all data? This action cannot be undone.</p>
+        <div class="flex justify-end space-x-4">
+          <button id="cancelResetBtn" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg">Cancel</button>
+          <button id="confirmResetBtn" class="px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg">Reset All Data</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script id="app-script">
+    // Initialize the application
+    document.addEventListener('DOMContentLoaded', function() {
+      // Initialize LocalStorage if needed
+      initializeLocalStorage();
+      
+      // Setup navigation
+      setupNavigation();
+      
+      // Load initial data
+      loadDashboardData();
+      setupTimerPage();
+      setupPlanPage();
+      setupJobsPage();
+      
+      // Setup reset data functionality
+      setupResetFunctionality();
+    });
+
+    // LocalStorage initialization
+    function initializeLocalStorage() {
+      const defaultData = {
+        sessions: [],
+        tasks: {
+          todo: [],
+          inProgress: [],
+          completed: []
+        },
+        jobs: []
+      };
+      
+      // Initialize each data section if it doesn't exist
+      if (!localStorage.getItem('placeTrackSessions')) {
+        localStorage.setItem('placeTrackSessions', JSON.stringify(defaultData.sessions));
+      }
+      
+      if (!localStorage.getItem('placeTrackTasks')) {
+        localStorage.setItem('placeTrackTasks', JSON.stringify(defaultData.tasks));
+      }
+      
+      if (!localStorage.getItem('placeTrackJobs')) {
+        localStorage.setItem('placeTrackJobs', JSON.stringify(defaultData.jobs));
+      }
+    }
+
+    // Navigation setup
+    function setupNavigation() {
+      const navLinks = document.querySelectorAll('.nav-link');
+      const contentSections = document.querySelectorAll('.content-section');
+      
+      navLinks.forEach(link => {
+        link.addEventListener('click', function() {
+          const targetPage = this.getAttribute('data-page');
+          
+          // Update active nav
+          navLinks.forEach(nav => nav.classList.remove('active-nav'));
+          this.classList.add('active-nav');
+          
+          // Show target section, hide others
+          contentSections.forEach(section => {
+            if (section.id === targetPage) {
+              section.classList.remove('hidden');
+            } else {
+              section.classList.add('hidden');
+            }
+          });
+        });
+      });
+    }
+
+    // Dashboard functionality
+    function loadDashboardData() {
+      const sessions = JSON.parse(localStorage.getItem('placeTrackSessions')) || [];
+      const jobs = JSON.parse(localStorage.getItem('placeTrackJobs')) || [];
+      
+      // Calculate total time focused (in minutes)
+      const totalMinutes = sessions.reduce((total, session) => total + session.duration, 0);
+      const totalHours = (totalMinutes / 60).toFixed(1);
+      document.getElementById('totalTimeFocused').textContent = `${totalHours} hours`;
+      
+      // Calculate unique days focused
+      const uniqueDays = new Set(sessions.map(session => session.date.split('T')[0])).size;
+      document.getElementById('daysFocused').textContent = `${uniqueDays} days`;
+      
+      // Calculate best day
+      const dayTotals = {};
+      sessions.forEach(session => {
+        const day = session.date.split('T')[0];
+        dayTotals[day] = (dayTotals[day] || 0) + session.duration;
+      });
+      
+      let bestDayMinutes = 0;
+      let bestDayDate = '';
+      
+      for (const [day, minutes] of Object.entries(dayTotals)) {
+        if (minutes > bestDayMinutes) {
+          bestDayMinutes = minutes;
+          bestDayDate = day;
+        }
+      }
+      
+      if (bestDayDate) {
+        const bestDayHours = (bestDayMinutes / 60).toFixed(1);
+        document.getElementById('bestDay').textContent = `${bestDayHours} hours`;
+        document.getElementById('bestDayDate').textContent = new Date(bestDayDate).toLocaleDateString();
+      }
+      
+      // Calculate streaks
+      let currentStreak = 0;
+      let maxStreak = 0;
+      
+      if (uniqueDays > 0) {
+        // Sort days for streak calculation
+        const sortedDays = Object.keys(dayTotals).sort();
+        
+        // Calculate current streak
+        const today = new Date().toISOString().split('T')[0];
+        let checkDate = new Date();
+        
+        while (true) {
+          const dateString = checkDate.toISOString().split('T')[0];
+          if (dayTotals[dateString]) {
+            currentStreak++;
+            checkDate.setDate(checkDate.getDate() - 1);
+          } else {
+            break;
+          }
+        }
+        
+        // Calculate max streak
+        let tempStreak = 1;
+        for (let i = 1; i < sortedDays.length; i++) {
+          const prevDate = new Date(sortedDays[i-1]);
+          const currDate = new Date(sortedDays[i]);
+          const diffDays = Math.round((currDate - prevDate) / (1000 * 60 * 60 * 24));
+          
+          if (diffDays === 1) {
+            tempStreak++;
+          } else {
+            maxStreak = Math.max(maxStreak, tempStreak);
+            tempStreak = 1;
+          }
+        }
+        
+        maxStreak = Math.max(maxStreak, tempStreak, currentStreak);
+      }
+      
+      document.getElementById('currentStreak').textContent = `${currentStreak} days`;
+      document.getElementById('maxStreak').textContent = maxStreak;
+      
+      // Jobs data
+      const totalJobs = jobs.length;
+      const interviewJobs = jobs.filter(job => job.status === 'Interview').length;
+      
+      document.getElementById('jobsAppliedCount').textContent = `${totalJobs} applications`;
+      document.getElementById('interviewCount').textContent = interviewJobs;
+      
+      // Subject pie chart
+      createSubjectPieChart(sessions);
+      
+      // Create activity heatmap
+      createActivityHeatmap(dayTotals);
+      
+      // Calculate best week and best month
+      calculateBestPeriods(sessions);
+    }
+
+    // Create subject pie chart
+    function createSubjectPieChart(sessions) {
+      // Group by subject
+      const subjectTotals = {};
+      sessions.forEach(session => {
+        subjectTotals[session.subject] = (subjectTotals[session.subject] || 0) + session.duration;
+      });
+      
+      // Prepare chart data
+      const subjects = Object.keys(subjectTotals);
+      const minutesData = Object.values(subjectTotals);
+      
+      // Generate colors
+      const colors = [
+        'rgba(0, 243, 255, 0.7)',
+        'rgba(157, 78, 221, 0.7)',
+        'rgba(255, 99, 132, 0.7)',
+        'rgba(54, 162, 235, 0.7)',
+        'rgba(255, 206, 86, 0.7)',
+        'rgba(75, 192, 192, 0.7)',
+        'rgba(153, 102, 255, 0.7)'
+      ];
+      
+      // Create chart if we have data
+      if (subjects.length > 0) {
+        const ctx = document.getElementById('subjectsPieChart').getContext('2d');
+        
+        // Destroy existing chart if it exists
+        if (window.subjectsChart) {
+          window.subjectsChart.destroy();
+        }
+        
+        window.subjectsChart = new Chart(ctx, {
+          type: 'doughnut',
+          data: {
+            labels: subjects,
+            datasets: [{
+              data: minutesData.map(m => (m / 60).toFixed(1)), // Convert to hours
+              backgroundColor: colors,
+              borderColor: 'rgba(30, 30, 30, 0.8)',
+              borderWidth: 1
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                position: 'right',
+                labels: {
+                  color: '#f0f0f0',
+                  padding: 10,
+                  usePointStyle: true
+                }
+              },
+              tooltip: {
+                callbacks: {
+                  label: function(context) {
+                    return `${context.label}: ${context.raw} hours`;
+                  }
+                }
+              }
+            },
+            cutout: '60%'
+          }
+        });
+      } else {
+        // No data placeholder
+        document.getElementById('subjectsPieChart').innerHTML = 
+          '<div class="flex items-center justify-center h-full text-gray-500">No focus sessions recorded yet</div>';
+      }
+    }
+
+    // Create activity heatmap
+    function createActivityHeatmap(dayTotals) {
+      const heatmapContainer = document.getElementById('activityHeatmap');
+      heatmapContainer.innerHTML = '';
+      
+      // Generate last 28 days (4 weeks)
+      const days = [];
+      const today = new Date();
+      
+      for (let i = 27; i >= 0; i--) {
+        const date = new Date();
+        date.setDate(today.getDate() - i);
+        days.push(date.toISOString().split('T')[0]);
+      }
+      
+      // Generate heatmap cells
+      days.forEach(day => {
+        const minutes = dayTotals[day] || 0;
+        let intensity = 0;
+        
+        // Intensity based on minutes focused that day
+        if (minutes > 0) {
+          if (minutes < 30) intensity = 1;
+          else if (minutes < 60) intensity = 2;
+          else if (minutes < 120) intensity = 3;
+          else intensity = 4;
+        }
+        
+        const cell = document.createElement('div');
+        cell.className = 'w-4 h-4 rounded-sm';
+        cell.title = `${new Date(day).toLocaleDateString()}: ${(minutes / 60).toFixed(1)} hours`;
+        
+        // Set color based on intensity
+        switch(intensity) {
+          case 0: cell.classList.add('bg-gray-800'); break;
+          case 1: cell.classList.add('bg-blue-900'); break;
+          case 2: cell.classList.add('bg-blue-700'); break;
+          case 3: cell.classList.add('bg-blue-500'); break;
+          case 4: cell.classList.add('bg-blue-300'); break;
+        }
+        
+        heatmapContainer.appendChild(cell);
+      });
+    }
+
+    // Calculate best week and month
+    function calculateBestPeriods(sessions) {
+      if (sessions.length === 0) return;
+      
+      // Group sessions by week and month
+      const weekTotals = {};
+      const monthTotals = {};
+      
+      sessions.forEach(session => {
+        const date = new Date(session.date);
+        
+        // Get week number (year + week)
+        const weekNum = getWeekNumber(date);
+        const weekKey = `${date.getFullYear()}-W${weekNum}`;
+        
+        // Get month (year + month)
+        const monthKey = `${date.getFullYear()}-${date.getMonth() + 1}`;
+        
+        weekTotals[weekKey] = (weekTotals[weekKey] || 0) + session.duration;
+        monthTotals[monthKey] = (monthTotals[monthKey] || 0) + session.duration;
+      });
+      
+      // Find best week
+      let bestWeekMinutes = 0;
+      let bestWeekKey = '';
+      
+      for (const [week, minutes] of Object.entries(weekTotals)) {
+        if (minutes > bestWeekMinutes) {
+          bestWeekMinutes = minutes;
+          bestWeekKey = week;
+        }
+      }
+      
+      // Find best month
+      let bestMonthMinutes = 0;
+      let bestMonthKey = '';
+      
+      for (const [month, minutes] of Object.entries(monthTotals)) {
+        if (minutes > bestMonthMinutes) {
+          bestMonthMinutes = minutes;
+          bestMonthKey = month;
+        }
+      }
+      
+      // Update the UI
+      if (bestWeekKey) {
+        const bestWeekHours = (bestWeekMinutes / 60).toFixed(1);
+        document.getElementById('bestWeek').textContent = `${bestWeekHours} hours`;
+        document.getElementById('bestWeekDate').textContent = `Week ${bestWeekKey.split('-W')[1]}, ${bestWeekKey.split('-')[0]}`;
+      }
+      
+      if (bestMonthKey) {
+        const bestMonthHours = (bestMonthMinutes / 60).toFixed(1);
+        document.getElementById('bestMonth').textContent = `${bestMonthHours} hours`;
+        
+        const monthName = new Date(2000, parseInt(bestMonthKey.split('-')[1]) - 1, 1).toLocaleString('default', { month: 'long' });
+        document.getElementById('bestMonthDate').textContent = `${monthName} ${bestMonthKey.split('-')[0]}`;
+      }
+    }
+
+    // Helper: Get week number of the year
+    function getWeekNumber(date) {
+      const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+      const dayNum = d.getUTCDay() || 7;
+      d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+      const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+      return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+    }
+
+    // Timer page setup
+    function setupTimerPage() {
+      const startBtn = document.getElementById('startBtn');
+      const pauseBtn = document.getElementById('pauseBtn');
+      const resetBtn = document.getElementById('resetBtn');
+      const timerDisplay = document.getElementById('timerDisplay');
+      const timerStatus = document.getElementById('timerStatus');
+      const timerProgressBar = document.getElementById('timerProgressBar');
+      const subjectSelect = document.getElementById('subjectSelect');
+      const pomodoroBtn = document.getElementById('pomodoroBtn');
+      const stopwatchBtn = document.getElementById('stopwatchBtn');
+      const sessionsContainer = document.getElementById('sessionsContainer');
+      
+      let timer = null;
+      let isRunning = false;
+      let isPaused = false;
+      let timerMode = 'pomodoro'; // Default mode
+      let timeLeft = 25 * 60; // 25 minutes in seconds
+      let timerStartTime = null;
+      let totalTime = 0;
+      let isBreakTime = false;
+      
+      // Load past sessions
+      loadSessionHistory();
+      
+      // Timer mode toggle
+      pomodoroBtn.addEventListener('click', () => {
+        if (timerMode === 'pomodoro') return;
+        
+        if (isRunning) {
+          resetTimer();
+        }
+        
+        timerMode = 'pomodoro';
+        timeLeft = 25 * 60;
+        timerDisplay.textContent = formatTime(timeLeft);
+        timerStatus.textContent = 'Focus Time';
+        
+        pomodoroBtn.classList.add('active-timer-btn');
+        stopwatchBtn.classList.remove('active-timer-btn');
+      });
+      
+      stopwatchBtn.addEventListener('click', () => {
+        if (timerMode === 'stopwatch') return;
+        
+        if (isRunning) {
+          resetTimer();
+        }
+        
+        timerMode = 'stopwatch';
+        timeLeft = 0;
+        timerDisplay.textContent = formatTime(timeLeft);
+        timerStatus.textContent = 'Stopwatch';
+        
+        stopwatchBtn.classList.add('active-timer-btn');
+        pomodoroBtn.classList.remove('active-timer-btn');
+      });
+      
+      // Timer controls
+      startBtn.addEventListener('click', () => {
+        // Check if subject is selected
+        if (!subjectSelect.value) {
+          alert('Please select a subject first');
+          return;
+        }
+        
+        if (!isRunning) {
+          startTimer();
+        } else if (isPaused) {
+          resumeTimer();
+        }
+      });
+      
+      pauseBtn.addEventListener('click', () => {
+        if (isRunning && !isPaused) {
+          pauseTimer();
+        }
+      });
+      
+      resetBtn.addEventListener('click', resetTimer);
+      
+      // Timer functions
+      function startTimer() {
+        isRunning = true;
+        isPaused = false;
+        timerStartTime = Date.now();
+        
+        // Update button states
+        startBtn.innerHTML = '<i class="fas fa-play mr-2"></i> Resume';
+        startBtn.disabled = true;
+        pauseBtn.disabled = false;
+        resetBtn.disabled = false;
+        
+        // Start the timer interval
+        if (timerMode === 'pomodoro') {
+          startPomodoroTimer();
+        } else {
+          startStopwatch();
+        }
+      }
+      
+      function startPomodoroTimer() {
+        // Set initial progress
+        updateProgress();
+        
+        timer = setInterval(() => {
+          if (timeLeft > 0) {
+            timeLeft--;
+            timerDisplay.textContent = formatTime(timeLeft);
+            updateProgress();
+          } else {
+            // Time is up
+            clearInterval(timer);
+            
+            if (!isBreakTime) {
+              // Focus time completed, save session
+              saveSession();
+              
+              // Switch to break time
+              isBreakTime = true;
+              timeLeft = 5 * 60; // 5 minute break
+              timerStatus.textContent = 'Break Time';
+              startPomodoroTimer();
+            } else {
+              // Break time completed
+              isBreakTime = false;
+              timeLeft = 25 * 60;
+              timerStatus.textContent = 'Focus Time';
+              isRunning = false;
+              resetBtn.disabled = false;
+              pauseBtn.disabled = true;
+              startBtn.disabled = false;
+              startBtn.innerHTML = '<i class="fas fa-play mr-2"></i> Start';
+              timerDisplay.textContent = formatTime(timeLeft);
+              updateProgress();
+              
+              // Play notification sound or alert
+              alert('Pomodoro cycle completed!');
+            }
+          }
+        }, 1000);
+      }
+      
+      function startStopwatch() {
+        timer = setInterval(() => {
+          const elapsedSeconds = Math.floor((Date.now() - timerStartTime) / 1000);
+          timeLeft = elapsedSeconds;
+          timerDisplay.textContent = formatTime(timeLeft);
+        }, 1000);
+      }
+      
+      function pauseTimer() {
+        clearInterval(timer);
+        isPaused = true;
+        
+        // Update button states
+        startBtn.disabled = false;
+      }
+      
+      function resumeTimer() {
+        isPaused = false;
+        startBtn.disabled = true;
+        
+        if (timerMode === 'pomodoro') {
+          startPomodoroTimer();
+        } else {
+          timerStartTime = Date.now() - (timeLeft * 1000);
+          startStopwatch();
+        }
+      }
+      
+      function resetTimer() {
+        clearInterval(timer);
+        isRunning = false;
+        isPaused = false;
+        
+        if (timerMode === 'pomodoro') {
+          timeLeft = 25 * 60;
+          timerStatus.textContent = 'Focus Time';
+          isBreakTime = false;
+        } else {
+          if (timeLeft > 0) {
+            // Save stopwatch session before resetting
+            saveSession();
+          }
+          timeLeft = 0;
+        }
+        
+        timerDisplay.textContent = formatTime(timeLeft);
+        updateProgress();
+        
+        // Update button states
+        startBtn.innerHTML = '<i class="fas fa-play mr-2"></i> Start';
+        startBtn.disabled = false;
+        pauseBtn.disabled = true;
+        resetBtn.disabled = true;
+      }
+      
+      function updateProgress() {
+        if (timerMode === 'pomodoro' && !isBreakTime) {
+          const totalSeconds = 25 * 60;
+          const percentComplete = ((totalSeconds - timeLeft) / totalSeconds) * 100;
+          timerProgressBar.style.width = `${percentComplete}%`;
+        } else if (timerMode === 'pomodoro' && isBreakTime) {
+          const totalSeconds = 5 * 60;
+          const percentComplete = ((totalSeconds - timeLeft) / totalSeconds) * 100;
+          timerProgressBar.style.width = `${percentComplete}%`;
+        } else {
+          timerProgressBar.style.width = '0%';
+        }
+      }
+      
+      function saveSession() {
+        const subject = subjectSelect.value;
+        let duration;
+        
+        if (timerMode === 'pomodoro' && !isBreakTime) {
+          duration = 25 * 60 - timeLeft; // Time spent in the current focus session
+        } else if (timerMode === 'stopwatch') {
+          duration = timeLeft; // Total time on the stopwatch
+        } else {
+          return; // Don't save break sessions
+        }
+        
+        // Only save sessions that lasted at least 1 minute
+        if (duration < 60) return;
+        
+        const session = {
+          id: Date.now().toString(),
+          subject: subject,
+          duration: duration,
+          date: new Date().toISOString()
+        };
+        
+        // Save to LocalStorage
+        const sessions = JSON.parse(localStorage.getItem('placeTrackSessions')) || [];
+        sessions.push(session);
+        localStorage.setItem('placeTrackSessions', JSON.stringify(sessions));
+        
+        // Refresh session history
+        loadSessionHistory();
+        
+        // Update dashboard data
+        loadDashboardData();
+      }
+      
+      function loadSessionHistory() {
+        const sessions = JSON.parse(localStorage.getItem('placeTrackSessions')) || [];
+        
+        if (sessions.length === 0) {
+          sessionsContainer.innerHTML = '<div class="text-gray-500 text-center py-8">No sessions recorded yet</div>';
+          return;
+        }
+        
+        // Sort by most recent first
+        sessions.sort((a, b) => new Date(b.date) - new Date(a.date));
+        
+        // Take only last 10 sessions
+        const recentSessions = sessions.slice(0, 10);
+        
+        // Render sessions
+        sessionsContainer.innerHTML = recentSessions.map(session => {
+          const date = new Date(session.date);
+          const formattedDate = date.toLocaleDateString();
+          const hours = Math.floor(session.duration / 60);
+          const minutes = session.duration % 60;
+          const timeText = hours > 0 ? 
+            `${hours}h ${minutes}m` : 
+            `${minutes}m`;
+          
+          return `
+            <div class="bg-gray-800 p-3 rounded-md">
+              <div class="flex justify-between items-center">
+                <span class="font-medium">${session.subject}</span>
+                <span class="text-sm text-gray-400">${formattedDate}</span>
+              </div>
+              <div class="mt-1 flex justify-between items-center">
+                <span class="text-sm text-gray-300">
+                  <i class="fas fa-clock text-blue-400 mr-1"></i> ${timeText}
+                </span>
+                <span class="text-xs px-2 py-1 bg-blue-900 rounded-full">${formatTime(session.duration)}</span>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+      
+      function formatTime(seconds) {
+        const mins = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+      }
+    }
+
+    // Plan page setup
+    function setupPlanPage() {
+      const taskForm = document.getElementById('taskForm');
+      const todoTasks = document.getElementById('todoTasks');
+      const progressTasks = document.getElementById('progressTasks');
+      const completedTasks = document.getElementById('completedTasks');
+      const todoCount = document.getElementById('todoCount');
+      const progressCount = document.getElementById('progressCount');
+      const completedCount = document.getElementById('completedCount');
+      
+      // Load tasks from LocalStorage
+      loadTasks();
+      
+      // Add task form submission
+      taskForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const title = document.getElementById('taskTitle').value;
+        const dueDate = document.getElementById('taskDueDate').value;
+        const description = document.getElementById('taskDescription').value;
+        
+        if (!title) return;
+        
+        const task = {
+          id: Date.now().toString(),
+          title: title,
+          description: description || '',
+          dueDate: dueDate || '',
+          createdAt: new Date().toISOString()
+        };
+        
+        // Add to todo tasks
+        const tasks = JSON.parse(localStorage.getItem('placeTrackTasks')) || { todo: [], inProgress: [], completed: [] };
+        tasks.todo.push(task);
+        localStorage.setItem('placeTrackTasks', JSON.stringify(tasks));
+        
+        // Reset form
+        taskForm.reset();
+        
+        // Reload tasks
+        loadTasks();
+      });
+      
+      // Initialize Sortable.js for drag and drop
+      function initSortable() {
+        const containers = [todoTasks, progressTasks, completedTasks];
+        
+        containers.forEach((container, columnIndex) => {
+          new Sortable(container, {
+            group: 'tasks',
+            animation: 150,
+            ghostClass: 'bg-gray-700',
+            onEnd: function(evt) {
+              const taskId = evt.item.getAttribute('data-id');
+              const fromColumn = getColumnName(evt.from.id);
+              const toColumn = getColumnName(evt.to.id);
+              
+              if (fromColumn !== toColumn) {
+                moveTask(taskId, fromColumn, toColumn);
+              }
+              
+              // Update task counts
+              updateTaskCounts();
+            }
+          });
+        });
+      }
+      
+      // Helper function to get column name from element ID
+      function getColumnName(elementId) {
+        switch(elementId) {
+          case 'todoTasks': return 'todo';
+          case 'progressTasks': return 'inProgress';
+          case 'completedTasks': return 'completed';
+          default: return 'todo';
+        }
+      }
+      
+      // Move task between columns
+      function moveTask(taskId, fromColumn, toColumn) {
+        const tasks = JSON.parse(localStorage.getItem('placeTrackTasks'));
+        const taskIndex = tasks[fromColumn].findIndex(task => task.id === taskId);
+        
+        if (taskIndex !== -1) {
+          const task = tasks[fromColumn][taskIndex];
+          tasks[fromColumn].splice(taskIndex, 1);
+          tasks[toColumn].push(task);
+          localStorage.setItem('placeTrackTasks', JSON.stringify(tasks));
+        }
+      }
+      
+      // Load tasks from LocalStorage
+      function loadTasks() {
+        const tasks = JSON.parse(localStorage.getItem('placeTrackTasks')) || { todo: [], inProgress: [], completed: [] };
+        
+        // Render tasks in each column
+        renderTasks(todoTasks, tasks.todo);
+        renderTasks(progressTasks, tasks.inProgress);
+        renderTasks(completedTasks, tasks.completed);
+        
+        // Update task counts
+        updateTaskCounts();
+        
+        // Initialize sortable after rendering
+        initSortable();
+      }
+      
+      // Render tasks in a column
+      function renderTasks(container, tasks) {
+        if (tasks.length === 0) {
+          container.innerHTML = `<div class="text-gray-500 text-center py-8">No tasks here</div>`;
+          return;
+        }
+        
+        container.innerHTML = tasks.map(task => {
+          // Format due date if present
+          let dueDateDisplay = '';
+          if (task.dueDate) {
+            const dueDate = new Date(task.dueDate);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            const isPast = dueDate < today;
+            const isToday = dueDate.toDateString() === today.toDateString();
+            
+            let dateClass = '';
+            if (isPast) dateClass = 'text-red-400';
+            else if (isToday) dateClass = 'text-yellow-400';
+            
+            dueDateDisplay = `
+              <div class="flex items-center ${dateClass} text-xs mt-2">
+                <i class="fas fa-calendar-alt mr-1"></i>
+                <span>Due: ${new Date(task.dueDate).toLocaleDateString()}</span>
+              </div>
+            `;
+          }
+          
+          return `
+            <div class="task-card bg-gray-800 p-3 rounded-md" data-id="${task.id}">
+              <div class="flex justify-between items-start">
+                <h4 class="font-medium">${task.title}</h4>
+                <button class="delete-task text-gray-500 hover:text-red-400 p-1" data-id="${task.id}">
+                  <i class="fas fa-times"></i>
+                </button>
+              </div>
+              ${task.description ? `<p class="text-sm text-gray-400 mt-1">${task.description}</p>` : ''}
+              ${dueDateDisplay}
+            </div>
+          `;
+        }).join('');
+        
+        // Add event listeners to delete buttons
+        container.querySelectorAll('.delete-task').forEach(button => {
+          button.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const taskId = this.getAttribute('data-id');
+            deleteTask(taskId);
+          });
+        });
+      }
+      
+      // Delete a task
+      function deleteTask(taskId) {
+        const tasks = JSON.parse(localStorage.getItem('placeTrackTasks'));
+        
+        // Check each column for the task
+        for (const column of ['todo', 'inProgress', 'completed']) {
+          const index = tasks[column].findIndex(task => task.id === taskId);
+          if (index !== -1) {
+            tasks[column].splice(index, 1);
+            localStorage.setItem('placeTrackTasks', JSON.stringify(tasks));
+            loadTasks();
+            break;
+          }
+        }
+      }
+      
+      // Update task counts
+      function updateTaskCounts() {
+        const tasks = JSON.parse(localStorage.getItem('placeTrackTasks')) || { todo: [], inProgress: [], completed: [] };
+        todoCount.textContent = tasks.todo.length;
+        progressCount.textContent = tasks.inProgress.length;
+        completedCount.textContent = tasks.completed.length;
+      }
+    }
+
+    // Jobs tracker page setup
+    function setupJobsPage() {
+      const jobForm = document.getElementById('jobForm');
+      const jobsList = document.getElementById('jobsList');
+      const statusFilter = document.getElementById('statusFilter');
+      const sortBy = document.getElementById('sortBy');
+      
+      // Load jobs from LocalStorage
+      loadJobs();
+      
+      // Add job form submission
+      jobForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const title = document.getElementById('jobTitle').value;
+        const company = document.getElementById('company').value;
+        const dateApplied = document.getElementById('dateApplied').value;
+        const status = document.getElementById('jobStatus').value;
+        const notes = document.getElementById('jobNotes').value;
+        
+        if (!title || !company || !dateApplied) return;
+        
+        const job = {
+          id: Date.now().toString(),
+          title: title,
+          company: company,
+          dateApplied: dateApplied,
+          status: status,
+          notes: notes || '',
+          createdAt: new Date().toISOString()
+        };
+        
+        // Add to jobs list
+        const jobs = JSON.parse(localStorage.getItem('placeTrackJobs')) || [];
+        jobs.push(job);
+        localStorage.setItem('placeTrackJobs', JSON.stringify(jobs));
+        
+        // Reset form
+        jobForm.reset();
+        
+        // Reload jobs
+        loadJobs();
+        
+        // Update dashboard data
+        loadDashboardData();
+      });
+      
+      // Filter and sort change handlers
+      statusFilter.addEventListener('change', loadJobs);
+      sortBy.addEventListener('change', loadJobs);
+      
+      // Load jobs from LocalStorage
+      function loadJobs() {
+        const jobs = JSON.parse(localStorage.getItem('placeTrackJobs')) || [];
+        const filterValue = statusFilter.value;
+        const sortValue = sortBy.value;
+        
+        // Apply filtering
+        let filteredJobs = jobs;
+        if (filterValue !== 'All') {
+          filteredJobs = jobs.filter(job => job.status === filterValue);
+        }
+        
+        // Apply sorting
+        filteredJobs.sort((a, b) => {
+          switch(sortValue) {
+            case 'dateAsc':
+              return new Date(a.dateApplied) - new Date(b.dateApplied);
+            case 'company':
+              return a.company.localeCompare(b.company);
+            case 'status':
+              return a.status.localeCompare(b.status);
+            case 'dateDesc':
+            default:
+              return new Date(b.dateApplied) - new Date(a.dateApplied);
+          }
+        });
+        
+        // Render jobs
+        if (filteredJobs.length === 0) {
+          jobsList.innerHTML = `
+            <tr>
+              <td colspan="5" class="px-6 py-10 text-center text-gray-500">
+                ${filterValue !== 'All' ? 'No jobs match the selected filter' : 'No job applications added yet'}
+              </td>
+            </tr>
+          `;
+          return;
+        }
+        
+        jobsList.innerHTML = filteredJobs.map(job => {
+          // Get status badge style
+          let statusClass = '';
+          let statusIcon = '';
+          
+          switch(job.status) {
+            case 'Applied':
+              statusClass = 'bg-blue-900 text-blue-200';
+              statusIcon = 'fa-paper-plane';
+              break;
+            case 'Interview':
+              statusClass = 'bg-yellow-900 text-yellow-200';
+              statusIcon = 'fa-calendar-check';
+              break;
+            case 'Rejected':
+              statusClass = 'bg-red-900 text-red-200';
+              statusIcon = 'fa-times-circle';
+              break;
+            case 'Placed':
+              statusClass = 'bg-green-900 text-green-200';
+              statusIcon = 'fa-check-circle';
+              break;
+          }
+          
+          return `
+            <tr class="border-t border-gray-800">
+              <td class="px-6 py-4">
+                <div class="font-medium">${job.title}</div>
+              </td>
+              <td class="px-6 py-4">${job.company}</td>
+              <td class="px-6 py-4">${new Date(job.dateApplied).toLocaleDateString()}</td>
+              <td class="px-6 py-4">
+                <span class="px-2 py-1 rounded-full ${statusClass} text-xs">
+                  <i class="fas ${statusIcon} mr-1"></i>
+                  ${job.status}
+                </span>
+              </td>
+              <td class="px-6 py-4">
+                <div class="flex space-x-2">
+                  <button class="edit-job p-1 text-gray-400 hover:text-white" data-id="${job.id}">
+                    <i class="fas fa-edit"></i>
+                  </button>
+                  <button class="delete-job p-1 text-gray-400 hover:text-red-400" data-id="${job.id}">
+                    <i class="fas fa-trash-alt"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          `;
+        }).join('');
+        
+        // Add event listeners to buttons
+        jobsList.querySelectorAll('.edit-job').forEach(button => {
+          button.addEventListener('click', function() {
+            const jobId = this.getAttribute('data-id');
+            editJob(jobId);
+          });
+        });
+        
+        jobsList.querySelectorAll('.delete-job').forEach(button => {
+          button.addEventListener('click', function() {
+            const jobId = this.getAttribute('data-id');
+            deleteJob(jobId);
+          });
+        });
+      }
+      
+      // Edit job function
+      function editJob(jobId) {
+        const jobs = JSON.parse(localStorage.getItem('placeTrackJobs')) || [];
+        const job = jobs.find(job => job.id === jobId);
+        
+        if (!job) return;
+        
+        // Populate form with job data
+        document.getElementById('jobTitle').value = job.title;
+        document.getElementById('company').value = job.company;
+        document.getElementById('dateApplied').value = job.dateApplied;
+        document.getElementById('jobStatus').value = job.status;
+        document.getElementById('jobNotes').value = job.notes;
+        
+        // Delete the existing job
+        deleteJob(jobId, false);
+        
+        // Focus on the form
+        document.getElementById('jobTitle').focus();
+      }
+      
+      // Delete job function
+      function deleteJob(jobId, reload = true) {
+        const jobs = JSON.parse(localStorage.getItem('placeTrackJobs')) || [];
+        const updatedJobs = jobs.filter(job => job.id !== jobId);
+        localStorage.setItem('placeTrackJobs', JSON.stringify(updatedJobs));
+        
+        if (reload) {
+          loadJobs();
+          loadDashboardData();
+        }
+      }
+    }
+
+    // Reset functionality setup
+    function setupResetFunctionality() {
+      const resetDataBtn = document.getElementById('resetDataBtn');
+      const confirmationModal = document.getElementById('confirmationModal');
+      const cancelResetBtn = document.getElementById('cancelResetBtn');
+      const confirmResetBtn = document.getElementById('confirmResetBtn');
+      
+      resetDataBtn.addEventListener('click', () => {
+        confirmationModal.classList.remove('hidden');
+      });
+      
+      cancelResetBtn.addEventListener('click', () => {
+        confirmationModal.classList.add('hidden');
+      });
+      
+      confirmResetBtn.addEventListener('click', () => {
+        // Clear all LocalStorage data
+        localStorage.removeItem('placeTrackSessions');
+        localStorage.removeItem('placeTrackTasks');
+        localStorage.removeItem('placeTrackJobs');
+        
+        // Re-initialize empty data structures
+        initializeLocalStorage();
+        
+        // Reload all data
+        loadDashboardData();
+        setupTimerPage();
+        setupPlanPage();
+        setupJobsPage();
+        
+        // Close modal
+        confirmationModal.classList.add('hidden');
+      });
+    }
+  </script>
+</body>
+</html>
