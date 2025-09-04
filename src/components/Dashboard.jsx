@@ -123,9 +123,11 @@ const Dashboard = ({ dataHook }) => {
     
     // Get first day of current month
     const firstDay = new Date(currentYear, currentMonth, 1)
+    // Get last day of current month
+    const lastDay = new Date(currentYear, currentMonth + 1, 0)
     
-    // Get all days from start of month to today
-    for (let date = new Date(firstDay); date <= today; date.setDate(date.getDate() + 1)) {
+    // Get all days in the current month (full month)
+    for (let date = new Date(firstDay); date <= lastDay; date.setDate(date.getDate() + 1)) {
       days.push(date.toISOString().split('T')[0])
     }
 

@@ -1,0 +1,30 @@
+API request failed: 
+Error {}
+message: "HTTP error! status: 401"
+stack: "Error: HTTP error! status: 401↵ at ApiService.makeRequest (https://731f260b-f706-45d6-bc08-954a1ea9896f-00-378kplutflbmj.worf.replit.dev/src/utils/api.js:22:15)↵ at async loadUserData (https://731f260b-f706-45d6-bc08-954a1ea9896f-00-378kplutflbmj.worf.replit.dev/src/hooks/useData.js:27:24)"
+get stack: ƒ ()
+set stack: ƒ ()
+[[Prototype]]: Object
+
+Failed to load user data: 
+Error {}
+
+at t.value (https://731f260b-f706-45d6-bc08-954a1ea9896f-00-378kplutflbmj.worf.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:17465)
+at new t (https://731f260b-f706-45d6-bc08-954a1ea9896f-00-378kplutflbmj.worf.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:12630)
+at t.value (https://731f260b-f706-45d6-bc08-954a1ea9896f-00-378kplutflbmj.worf.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:32766)
+at https://731f260b-f706-45d6-bc08-954a1ea9896f-00-378kplutflbmj.worf.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:34400
+API request failed: 
+Error {}
+message: "HTTP error! status: 401"
+stack: "Error: HTTP error! status: 401↵ at ApiService.makeRequest (https://731f260b-f706-45d6-bc08-954a1ea9896f-00-378kplutflbmj.worf.replit.dev/src/utils/api.js:22:15)↵ at async loadUserData (https://731f260b-f706-45d6-bc08-954a1ea9896f-00-378kplutflbmj.worf.replit.dev/src/hooks/useData.js:27:24)"
+get stack: ƒ ()
+set stack: ƒ ()
+[[Prototype]]: Object
+
+Failed to load user data: 
+Error {}
+
+at t.value (https://731f260b-f706-45d6-bc08-954a1ea9896f-00-378kplutflbmj.worf.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:17465)
+at new t (https://731f260b-f706-45d6-bc08-954a1ea9896f-00-378kplutflbmj.worf.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:12630)
+at t.value (https://731f260b-f706-45d6-bc08-954a1ea9896f-00-378kplutflbmj.worf.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:32766)
+at https://731f260b-f706-45d6-bc08-954a1ea9896f-00-378kplutflbmj.worf.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:34400

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { apiService } from '../utils/api';
 
-export const useData = () => {
+export const useData = (isAuthenticated = false) => {
   const [data, setData] = useState({
     timerSessions: [],
     tasks: { todo: [], doing: [], done: [] },
@@ -13,13 +13,16 @@ export const useData = () => {
       sessionsThisWeek: 0
     }
   });
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Load data from MongoDB on component mount
+  // Load data from MongoDB only when authenticated
   useEffect(() => {
-    loadUserData();
-  }, []);
+    if (isAuthenticated) {
+      loadUserData();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAuthenticated]);
 
   const loadUserData = async () => {
     try {

@@ -13,7 +13,10 @@ function App() {
   const [activeSection, setActiveSection] = useState('dashboard')
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [user, setUser] = useState(null)
-  const dataHook = useData()
+  const [authChecked, setAuthChecked] = useState(false)
+  
+  // Only initialize data hook after authentication is confirmed
+  const dataHook = useData(isAuthenticated)
 
   useEffect(() => {
     // Check if user is already logged in
@@ -24,6 +27,7 @@ function App() {
       setUser(JSON.parse(savedUser))
       setIsAuthenticated(true)
     }
+    setAuthChecked(true)
   }, [])
 
   const handleEnterApp = () => {
@@ -55,6 +59,18 @@ function App() {
       default:
         return <Dashboard dataHook={dataHook} />
     }
+  }
+
+  // Show loading while checking authentication
+  if (!authChecked) {
+    return (
+      <div className="min-h-screen bg-main-bg flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-soft-sky-blue mb-4 mx-auto"></div>
+          <p className="text-secondary-text">Loading...</p>
+        </div>
+      </div>
+    )
   }
 
   if (!isAuthenticated) {
