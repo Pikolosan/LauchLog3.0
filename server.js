@@ -120,7 +120,7 @@ app.post('/api/auth/register', [
       email,
       password: hashedPassword,
       name,
-      role: email === 'admin@launchlog.com' ? 'admin' : 'user', // Make admin@launchlog.com an admin
+      role: (email === 'admin@launchlog.com' || email === 'admin@launchlog.co') ? 'admin' : 'user', // Make admin emails admin
       createdAt: new Date()
     };
 
@@ -185,7 +185,29 @@ app.post('/api/auth/login', [
 
     // Generate JWT token
     const userId = user.id || user._id.toString();
-    const userRole = user.role || 'user';
+    // Auto-promote admin emails to admin role
+    let userRole = user.role || 'user';
+    if ((user.email === 'admin@launchlog.com' || user.email === 'admin@launchlog.co') && userRole !== 'admin') {
+      userRole = 'admin';
+      // Update role in database
+      try {
+        if (isConnected) {
+          await db.collection('users').updateOne(
+            { email: user.email },
+            { $set: { role: 'admin' } }
+          );
+        } else {
+          // Update fallback storage
+          const userIndex = fallbackUsers.findIndex(u => u.email === user.email);
+          if (userIndex > -1) {
+            fallbackUsers[userIndex].role = 'admin';
+          }
+        }
+      } catch (err) {
+        console.error('Error updating user role:', err);
+      }
+    }
+    
     const token = jwt.sign(
       { userId, email: user.email, name: user.name, role: userRole },
       JWT_SECRET,
