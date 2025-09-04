@@ -27,8 +27,13 @@ const Timer = () => {
   }, [timerMode, isBreakTime])
 
   const formatTime = (seconds) => {
-    const mins = Math.floor(seconds / 60)
+    const hours = Math.floor(seconds / 3600)
+    const mins = Math.floor((seconds % 3600) / 60)
     const secs = seconds % 60
+    
+    if (hours > 0) {
+      return `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
+    }
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
   }
 
@@ -46,21 +51,24 @@ const Timer = () => {
   const saveSession = () => {
     if (!selectedSubject) return
     
-    let duration
+    let durationInSeconds
     if (timerMode === 'pomodoro' && !isBreakTime) {
-      duration = 25 * 60 - timeLeft
+      durationInSeconds = 25 * 60 - timeLeft
     } else if (timerMode === 'stopwatch') {
-      duration = timeLeft
+      durationInSeconds = timeLeft
     } else {
       return
     }
 
-    if (duration < 60) return
+    if (durationInSeconds < 60) return
+
+    // Convert seconds to minutes for storage (this is what the Dashboard expects)
+    const durationInMinutes = Math.round(durationInSeconds / 60)
 
     const session = {
       id: Date.now().toString(),
       subject: selectedSubject,
-      duration: duration,
+      duration: durationInMinutes,
       date: new Date().toISOString()
     }
 
@@ -245,9 +253,14 @@ const Timer = () => {
               ) : (
                 sessions.map((session) => {
                   const date = new Date(session.date)
-                  const hours = Math.floor(session.duration / 60)
-                  const minutes = session.duration % 60
+                  // session.duration is stored in minutes
+                  const totalMinutes = session.duration
+                  const hours = Math.floor(totalMinutes / 60)
+                  const minutes = totalMinutes % 60
                   const timeText = hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`
+                  
+                  // Convert minutes to seconds for formatTime function
+                  const timeInSeconds = totalMinutes * 60
                   
                   return (
                     <div key={session.id} className="bg-gray-800 p-3 rounded-md">
@@ -259,7 +272,7 @@ const Timer = () => {
                         <span className="text-sm text-gray-300">
                           <i className="fas fa-clock text-blue-400 mr-1"></i> {timeText}
                         </span>
-                        <span className="text-xs px-2 py-1 bg-blue-900 rounded-full">{formatTime(session.duration)}</span>
+                        <span className="text-xs px-2 py-1 bg-blue-900 rounded-full">{formatTime(timeInSeconds)}</span>
                       </div>
                     </div>
                   )
