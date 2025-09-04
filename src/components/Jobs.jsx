@@ -111,17 +111,17 @@ const Jobs = () => {
 
   const getStatusBadge = (status) => {
     const styles = {
-      Applied: { class: 'bg-blue-900 text-blue-200', icon: 'fa-paper-plane' },
-      Interview: { class: 'bg-yellow-900 text-yellow-200', icon: 'fa-calendar-check' },
-      Rejected: { class: 'bg-red-900 text-red-200', icon: 'fa-times-circle' },
-      Placed: { class: 'bg-green-900 text-green-200', icon: 'fa-check-circle' }
+      Applied: { class: 'status-applied', icon: 'fa-paper-plane' },
+      Interview: { class: 'status-interview', icon: 'fa-calendar-check' },
+      Rejected: { class: 'status-rejected', icon: 'fa-times-circle' },
+      Placed: { class: 'status-placed', icon: 'fa-check-circle' }
     }
     
     const style = styles[status] || styles.Applied
     
     return (
-      <span className={`px-2 py-1 rounded-full ${style.class} text-xs`}>
-        <i className={`fas ${style.icon} mr-1`}></i>
+      <span className={`${style.class} inline-flex items-center`}>
+        <i className={`fas ${style.icon} mr-2`}></i>
         {status}
       </span>
     )
@@ -132,10 +132,13 @@ const Jobs = () => {
       <h2 className="text-3xl font-bold mb-6">Job Applications Tracker</h2>
       
       {/* Add New Job Form */}
-      <div className="card p-6 rounded-lg mb-8">
-        <h3 className="text-xl font-semibold mb-4">
-          {editingJobId ? 'Edit Job Application' : 'Add New Job Application'}
-        </h3>
+      <div className="card p-8 mb-8">
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="text-2xl font-bold text-primary">
+            {editingJobId ? 'Edit Job Application' : 'Add New Job Application'}
+          </h3>
+          <i className="fas fa-plus-circle text-info text-2xl"></i>
+        </div>
         
         <form onSubmit={addJob} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -215,12 +218,12 @@ const Jobs = () => {
                     notes: ''
                   })
                 }}
-                className="px-6 py-2 rounded-lg bg-gray-700 hover:bg-gray-600"
+                className="btn-secondary px-6 py-3"
               >
                 Cancel
               </button>
             )}
-            <button type="submit" className="btn-neon px-6 py-2 rounded-lg">
+            <button type="submit" className="btn-success px-8 py-3">
               <i className="fas fa-plus mr-2"></i> {editingJobId ? 'Update Job' : 'Add Job'}
             </button>
           </div>
@@ -228,7 +231,7 @@ const Jobs = () => {
       </div>
       
       {/* Filter Options */}
-      <div className="mb-6 flex flex-wrap gap-3">
+      <div className="mb-8 flex flex-wrap gap-4">
         <div>
           <label className="block text-sm font-medium text-gray-400 mb-1">Filter by Status</label>
           <select 
@@ -260,47 +263,50 @@ const Jobs = () => {
       </div>
       
       {/* Jobs List */}
-      <div className="card rounded-lg overflow-hidden">
+      <div className="card overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="bg-gray-800 text-left">
+          <table className="w-full">
+            <thead className="text-left">
               <tr>
-                <th className="px-6 py-4">Job Title</th>
-                <th className="px-6 py-4">Company</th>
-                <th className="px-6 py-4">Date Applied</th>
-                <th className="px-6 py-4">Status</th>
-                <th className="px-6 py-4">Actions</th>
+                <th className="px-6 py-5 font-semibold text-primary">Job Title</th>
+                <th className="px-6 py-5 font-semibold text-primary">Company</th>
+                <th className="px-6 py-5 font-semibold text-primary">Date Applied</th>
+                <th className="px-6 py-5 font-semibold text-primary">Status</th>
+                <th className="px-6 py-5 font-semibold text-primary">Actions</th>
               </tr>
             </thead>
             <tbody>
               {filteredJobs.length === 0 ? (
                 <tr>
-                  <td colSpan="5" className="px-6 py-10 text-center text-gray-500">
-                    {statusFilter !== 'All' ? 'No jobs match the selected filter' : 'No job applications added yet'}
+                  <td colSpan="5" className="px-6 py-16 text-center text-secondary">
+                    <i className="fas fa-briefcase text-4xl mb-4 opacity-50 block"></i>
+                    <p>{statusFilter !== 'All' ? 'No jobs match the selected filter' : 'No job applications added yet'}</p>
                   </td>
                 </tr>
               ) : (
                 filteredJobs.map((job) => (
-                  <tr key={job.id} className="border-t border-gray-800">
-                    <td className="px-6 py-4">
-                      <div className="font-medium">{job.title}</div>
+                  <tr key={job.id}>
+                    <td className="px-6 py-5">
+                      <div className="font-semibold text-primary">{job.title}</div>
                     </td>
-                    <td className="px-6 py-4">{job.company}</td>
-                    <td className="px-6 py-4">{new Date(job.dateApplied).toLocaleDateString()}</td>
-                    <td className="px-6 py-4">
+                    <td className="px-6 py-5 text-secondary">{job.company}</td>
+                    <td className="px-6 py-5 text-secondary">{new Date(job.dateApplied).toLocaleDateString()}</td>
+                    <td className="px-6 py-5">
                       {getStatusBadge(job.status)}
                     </td>
-                    <td className="px-6 py-4">
-                      <div className="flex space-x-2">
+                    <td className="px-6 py-5">
+                      <div className="flex space-x-3">
                         <button 
                           onClick={() => editJob(job.id)}
-                          className="p-1 text-gray-400 hover:text-white"
+                          className="p-2 text-info hover:text-success transition-colors rounded-lg hover:bg-elevated-bg"
+                          title="Edit job"
                         >
                           <i className="fas fa-edit"></i>
                         </button>
                         <button 
                           onClick={() => deleteJob(job.id)}
-                          className="p-1 text-gray-400 hover:text-red-400"
+                          className="p-2 text-danger hover:text-soft-coral-red transition-colors rounded-lg hover:bg-elevated-bg"
+                          title="Delete job"
                         >
                           <i className="fas fa-trash-alt"></i>
                         </button>

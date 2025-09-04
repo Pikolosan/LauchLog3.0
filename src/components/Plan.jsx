@@ -165,33 +165,35 @@ const Plan = () => {
       const isToday = dueDate.toDateString() === today.toDateString()
       
       let dateClass = ''
-      if (isPast) dateClass = 'text-red-400'
-      else if (isToday) dateClass = 'text-yellow-400'
+      if (isPast) dateClass = 'text-danger'
+      else if (isToday) dateClass = 'text-warning'
+      else dateClass = 'text-info'
       
       dueDateDisplay = (
-        <div className={`flex items-center ${dateClass} text-xs mt-2`}>
-          <i className="fas fa-calendar-alt mr-1"></i>
+        <div className={`flex items-center ${dateClass} text-xs mt-3`}>
+          <i className="fas fa-calendar-alt mr-2"></i>
           <span>Due: {dueDate.toLocaleDateString()}</span>
         </div>
       )
     }
     
     return (
-      <div key={task.id} className="task-card bg-gray-800 p-3 rounded-md" data-id={task.id}>
-        <div className="flex justify-between items-start">
-          <h4 className="font-medium">{task.title}</h4>
+      <div key={task.id} className="task-card p-4" data-id={task.id}>
+        <div className="flex justify-between items-start mb-2">
+          <h4 className="font-semibold text-primary text-sm">{task.title}</h4>
           <button 
             onClick={(e) => {
               e.stopPropagation()
               deleteTask(task.id)
             }}
-            className="text-gray-500 hover:text-red-400 p-1"
+            className="text-secondary hover:text-danger transition-colors p-1 rounded"
+            title="Delete task"
           >
-            <i className="fas fa-times"></i>
+            <i className="fas fa-times text-xs"></i>
           </button>
         </div>
         {task.description && (
-          <p className="text-sm text-gray-400 mt-1">{task.description}</p>
+          <p className="text-sm text-secondary mt-2 leading-relaxed">{task.description}</p>
         )}
         {dueDateDisplay}
       </div>
@@ -203,8 +205,11 @@ const Plan = () => {
       <h2 className="text-3xl font-bold mb-6">Task Planner</h2>
       
       {/* Add New Task Form */}
-      <div className="card p-6 rounded-lg mb-8">
-        <h3 className="text-xl font-semibold mb-4">Add New Task</h3>
+      <div className="card p-8 mb-8">
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="text-2xl font-bold text-primary">Add New Task</h3>
+          <i className="fas fa-plus-square text-info text-2xl"></i>
+        </div>
         
         <form onSubmit={addTask} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -243,7 +248,7 @@ const Plan = () => {
           </div>
           
           <div className="flex justify-end">
-            <button type="submit" className="btn-neon px-6 py-2 rounded-lg">
+            <button type="submit" className="btn-success px-8 py-3">
               <i className="fas fa-plus mr-2"></i> Add Task
             </button>
           </div>
@@ -253,16 +258,19 @@ const Plan = () => {
       {/* Kanban Board */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* To Do Column */}
-        <div className="kanban-column p-4">
-          <h3 className="text-xl font-semibold mb-4 flex items-center">
-            <i className="fas fa-list-ul mr-2 text-blue-400"></i>
+        <div className="kanban-column p-6">
+          <h3 className="text-xl font-bold mb-6 flex items-center">
+            <i className="fas fa-list-ul mr-3 text-info text-lg"></i>
             To Do
-            <span className="ml-2 text-sm bg-gray-800 px-2 py-1 rounded-full">{tasks.todo.length}</span>
+            <span className="ml-auto status-applied text-sm px-3 py-1">{tasks.todo.length}</span>
           </h3>
           
-          <div ref={todoRef} className="space-y-3 min-h-[200px]">
+          <div ref={todoRef} className="space-y-4 min-h-[300px]">
             {tasks.todo.length === 0 ? (
-              <div className="text-gray-500 text-center py-8">No tasks here</div>
+              <div className="text-secondary text-center py-12">
+                <i className="fas fa-plus-circle text-3xl mb-3 opacity-50"></i>
+                <p>No tasks here</p>
+              </div>
             ) : (
               tasks.todo.map(renderTask)
             )}
@@ -270,16 +278,19 @@ const Plan = () => {
         </div>
         
         {/* In Progress Column */}
-        <div className="kanban-column p-4">
-          <h3 className="text-xl font-semibold mb-4 flex items-center">
-            <i className="fas fa-spinner mr-2 text-yellow-400"></i>
+        <div className="kanban-column p-6">
+          <h3 className="text-xl font-bold mb-6 flex items-center">
+            <i className="fas fa-spinner mr-3 text-warning text-lg"></i>
             In Progress
-            <span className="ml-2 text-sm bg-gray-800 px-2 py-1 rounded-full">{tasks.inProgress.length}</span>
+            <span className="ml-auto status-interview text-sm px-3 py-1">{tasks.inProgress.length}</span>
           </h3>
           
-          <div ref={progressRef} className="space-y-3 min-h-[200px]">
+          <div ref={progressRef} className="space-y-4 min-h-[300px]">
             {tasks.inProgress.length === 0 ? (
-              <div className="text-gray-500 text-center py-8">No tasks here</div>
+              <div className="text-secondary text-center py-12">
+                <i className="fas fa-cog fa-spin text-3xl mb-3 opacity-50"></i>
+                <p>No tasks here</p>
+              </div>
             ) : (
               tasks.inProgress.map(renderTask)
             )}
@@ -287,16 +298,19 @@ const Plan = () => {
         </div>
         
         {/* Completed Column */}
-        <div className="kanban-column p-4">
-          <h3 className="text-xl font-semibold mb-4 flex items-center">
-            <i className="fas fa-check-circle mr-2 text-green-400"></i>
+        <div className="kanban-column p-6">
+          <h3 className="text-xl font-bold mb-6 flex items-center">
+            <i className="fas fa-check-circle mr-3 text-success text-lg"></i>
             Completed
-            <span className="ml-2 text-sm bg-gray-800 px-2 py-1 rounded-full">{tasks.completed.length}</span>
+            <span className="ml-auto status-placed text-sm px-3 py-1">{tasks.completed.length}</span>
           </h3>
           
-          <div ref={completedRef} className="space-y-3 min-h-[200px]">
+          <div ref={completedRef} className="space-y-4 min-h-[300px]">
             {tasks.completed.length === 0 ? (
-              <div className="text-gray-500 text-center py-8">No tasks here</div>
+              <div className="text-secondary text-center py-12">
+                <i className="fas fa-check-circle text-3xl mb-3 opacity-50"></i>
+                <p>No tasks here</p>
+              </div>
             ) : (
               tasks.completed.map(renderTask)
             )}

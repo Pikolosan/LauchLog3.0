@@ -1,0 +1,70 @@
+Here’s a **color palette** idea for your **dark-themed job tracking app** — designed to be **calming, energetic, and eye-friendly**, with **bright accents** for clarity and visual appeal:
+
+---
+
+### 🌑 **Base (Dark Theme Backgrounds)**
+
+These set the tone and reduce eye strain:
+
+* **Primary Background**: `#121212` – Deep charcoal black
+* **Surface Background**: `#1E1E1E` – Soft black for cards/panels
+* **Elevated Surface**: `#2C2C2E` – For modals, hovered elements
+
+---
+
+### 🌈 **Accent Colors (Bright, Calming, Energetic)**
+
+Used for highlights, buttons, tags, and progress indicators.
+
+#### 🔹 Calming Blues
+
+* **Soft Sky Blue**: `#4FC3F7` – Peaceful, techy
+* **Electric Indigo**: `#3F51B5` – Elegant and focused
+
+#### 🟢 Energizing Greens
+
+* **Mint Green**: `#00C896` – Fresh and optimistic
+* **Lime Accent**: `#AEEA00` – Bright but soft on eyes
+
+#### 🔸 Warm & Motivating Oranges
+
+* **Peach Orange**: `#FFB74D` – Gentle and motivating
+* **Amber**: `#FFC107` – For positive statuses and alerts
+
+#### 🔴 Focus/Alert Red (Used Sparingly)
+
+* **Soft Coral Red**: `#FF6F61` – For errors or urgent tasks (balanced tone)
+
+---
+
+### ⚪ **Neutral Text & Icon Colors**
+
+* **Primary Text**: `#E0E0E0` – Light grey for good contrast
+* **Secondary Text**: `#B0B0B0` – Dimmed for subtler text
+* **Divider Lines**: `#3A3A3C` – Subtle separators
+* **Card Borders**: `#2F2F2F`
+
+---
+
+### ✅ Example Usage
+
+| Element               | Color     |
+| --------------------- | --------- |
+| App Background        | `#121212` |
+| Task Card BG          | `#1E1E1E` |
+| Button (Primary)      | `#4FC3F7` |
+| Button (Success)      | `#00C896` |
+| Status: "In Progress" | `#FFC107` |
+| Status: "Completed"   | `#00C896` |
+| Status: "Stuck"       | `#FF6F61` |
+| Highlight Color       | `#AEEA00` |
+
+---
+
+### 🎨 Figma/Design Tool Tip:
+
+When creating components in a dark UI, apply **bright accents sparingly** to draw attention to what matters: active tasks, call-to-action buttons, or status chips. Keep your text contrast above **AA accessibility standards**.
+
+---
+
+Would you like this exported as a swatch file or applied to a sample UI mockup?

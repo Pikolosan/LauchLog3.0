@@ -158,88 +158,116 @@ const Dashboard = () => {
       <h2 className="text-3xl font-bold mb-6 welcome-gradient">Dashboard Overview</h2>
       
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
-        <div className="card p-5 rounded-lg">
-          <h3 className="text-gray-400 text-sm mb-1">Total Time Focused</h3>
-          <p className="text-2xl font-bold">{stats.totalTimeFocused}</p>
-          <div className="mt-2 text-xs text-gray-500">
-            <i className="fas fa-arrow-up text-green-400"></i>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="stat-card">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-secondary text-sm font-medium">Total Time Focused</h3>
+            <i className="fas fa-clock text-info text-lg"></i>
+          </div>
+          <p className="text-3xl font-bold text-primary mb-2">{stats.totalTimeFocused}</p>
+          <div className="flex items-center text-xs text-success">
+            <i className="fas fa-arrow-up mr-1"></i>
             <span>Since you started tracking</span>
           </div>
         </div>
 
-        <div className="card p-5 rounded-lg">
-          <h3 className="text-gray-400 text-sm mb-1">Days Focused</h3>
-          <p className="text-2xl font-bold">{stats.daysFocused}</p>
-          <div className="mt-2 text-xs text-gray-500">
-            <i className="fas fa-calendar-alt"></i>
+        <div className="stat-card">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-secondary text-sm font-medium">Days Focused</h3>
+            <i className="fas fa-calendar-alt text-warning text-lg"></i>
+          </div>
+          <p className="text-3xl font-bold text-primary mb-2">{stats.daysFocused}</p>
+          <div className="flex items-center text-xs text-info">
+            <i className="fas fa-calendar mr-1"></i>
             <span>Total days with activity</span>
           </div>
         </div>
 
-        <div className="card p-5 rounded-lg">
-          <h3 className="text-gray-400 text-sm mb-1">Best Day</h3>
-          <p className="text-2xl font-bold">{stats.bestDay}</p>
-          <div className="mt-2 text-xs text-gray-500">
-            <i className="fas fa-trophy text-yellow-400"></i>
+        <div className="stat-card">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-secondary text-sm font-medium">Best Day</h3>
+            <i className="fas fa-trophy text-warning text-lg"></i>
+          </div>
+          <p className="text-3xl font-bold text-primary mb-2">{stats.bestDay}</p>
+          <div className="flex items-center text-xs text-secondary">
+            <i className="fas fa-star mr-1"></i>
             <span>{stats.bestDayDate}</span>
           </div>
         </div>
 
-        <div className="card p-5 rounded-lg">
-          <h3 className="text-gray-400 text-sm mb-1">Current Streak</h3>
-          <p className="text-2xl font-bold">{stats.currentStreak}</p>
-          <div className="mt-2 text-xs text-gray-500">
-            <i className="fas fa-fire text-orange-400"></i>
+        <div className="stat-card">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-secondary text-sm font-medium">Current Streak</h3>
+            <i className="fas fa-fire text-danger text-lg"></i>
+          </div>
+          <p className="text-3xl font-bold text-primary mb-2">{stats.currentStreak}</p>
+          <div className="flex items-center text-xs text-secondary">
+            <i className="fas fa-bolt mr-1"></i>
             <span>Max: {stats.maxStreak} days</span>
           </div>
         </div>
       </div>
 
       {/* Additional Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
-        <div className="card p-5 rounded-lg">
-          <h3 className="text-gray-400 text-sm mb-1">Best Week</h3>
-          <p className="text-2xl font-bold">{stats.bestWeek}</p>
-          <div className="mt-2 text-xs text-gray-500">
-            <i className="fas fa-calendar-week text-blue-400"></i>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="stat-card">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-secondary text-sm font-medium">Best Week</h3>
+            <i className="fas fa-calendar-week text-info text-lg"></i>
+          </div>
+          <p className="text-3xl font-bold text-primary mb-2">{stats.bestWeek}</p>
+          <div className="flex items-center text-xs text-secondary">
+            <i className="fas fa-chart-line mr-1"></i>
             <span>{stats.bestWeekDate}</span>
           </div>
         </div>
 
-        <div className="card p-5 rounded-lg">
-          <h3 className="text-gray-400 text-sm mb-1">Best Month</h3>
-          <p className="text-2xl font-bold">{stats.bestMonth}</p>
-          <div className="mt-2 text-xs text-gray-500">
-            <i className="fas fa-calendar-alt text-purple-400"></i>
+        <div className="stat-card">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-secondary text-sm font-medium">Best Month</h3>
+            <i className="fas fa-calendar-alt text-success text-lg"></i>
+          </div>
+          <p className="text-3xl font-bold text-primary mb-2">{stats.bestMonth}</p>
+          <div className="flex items-center text-xs text-secondary">
+            <i className="fas fa-medal mr-1"></i>
             <span>{stats.bestMonthDate}</span>
           </div>
         </div>
 
-        <div className="card p-5 rounded-lg">
-          <h3 className="text-gray-400 text-sm mb-1">Jobs Applied</h3>
-          <p className="text-2xl font-bold">{stats.jobsAppliedCount}</p>
-          <div className="mt-2 text-xs text-gray-500">
-            <span>{stats.interviewCount}</span> interviews scheduled
+        <div className="stat-card">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-secondary text-sm font-medium">Jobs Applied</h3>
+            <i className="fas fa-briefcase text-warning text-lg"></i>
+          </div>
+          <p className="text-3xl font-bold text-primary mb-2">{stats.jobsAppliedCount}</p>
+          <div className="flex items-center text-xs text-success">
+            <i className="fas fa-handshake mr-1"></i>
+            <span>{stats.interviewCount} interviews scheduled</span>
           </div>
         </div>
       </div>
 
       {/* Charts Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         {/* Subject Distribution Pie Chart */}
-        <div className="card p-5 rounded-lg">
-          <h3 className="text-gray-400 text-sm mb-3">Time Distribution by Subject</h3>
+        <div className="card p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-primary text-lg font-semibold">Time Distribution by Subject</h3>
+            <i className="fas fa-chart-pie text-info text-lg"></i>
+          </div>
           <div className="h-64">
             {renderSubjectChart()}
           </div>
         </div>
 
         {/* Activity Heatmap */}
-        <div className="card p-5 rounded-lg">
-          <h3 className="text-gray-400 text-sm mb-3">Focus Activity Heatmap</h3>
+        <div className="card p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-primary text-lg font-semibold">Focus Activity Heatmap</h3>
+            <i className="fas fa-fire text-warning text-lg"></i>
+          </div>
           <div className="h-64 flex items-center justify-center">
-            <div className="grid grid-cols-7 gap-1">
+            <div className="grid grid-cols-7 gap-2">
               {renderActivityHeatmap()}
             </div>
           </div>

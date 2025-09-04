@@ -160,13 +160,13 @@ const Timer = () => {
       
       <div className="flex flex-col md:flex-row gap-8">
         {/* Timer Card */}
-        <div className="card p-6 rounded-lg flex-1">
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-400 mb-2">Select Subject</label>
+        <div className="card p-8 flex-1">
+          <div className="mb-6">
+            <label className="block text-sm font-semibold text-secondary mb-3">Select Subject</label>
             <select 
               value={selectedSubject}
               onChange={(e) => setSelectedSubject(e.target.value)}
-              className="w-full bg-gray-800 border border-gray-700 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full"
             >
               <option value="">Select a subject...</option>
               <option value="Data Structures">Data Structures</option>
@@ -178,25 +178,25 @@ const Timer = () => {
             </select>
           </div>
 
-          <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-400 mb-2">Timer Mode</label>
+          <div className="mb-8">
+            <label className="block text-sm font-semibold text-secondary mb-3">Timer Mode</label>
             <div className="flex space-x-4">
               <button 
                 onClick={switchToPomodoro}
-                className={`flex-1 py-2 px-4 rounded-md border border-gray-700 ${
+                className={`flex-1 py-3 px-4 rounded-xl font-medium transition-all ${
                   timerMode === 'pomodoro' 
-                    ? 'bg-blue-600 border-blue-600' 
-                    : 'bg-gray-800 hover:bg-gray-700'
+                    ? 'btn-primary' 
+                    : 'btn-secondary'
                 }`}
               >
                 <i className="fas fa-hourglass-half mr-2"></i> Pomodoro
               </button>
               <button 
                 onClick={switchToStopwatch}
-                className={`flex-1 py-2 px-4 rounded-md border border-gray-700 ${
+                className={`flex-1 py-3 px-4 rounded-xl font-medium transition-all ${
                   timerMode === 'stopwatch' 
-                    ? 'bg-blue-600 border-blue-600' 
-                    : 'bg-gray-800 hover:bg-gray-700'
+                    ? 'btn-primary' 
+                    : 'btn-secondary'
                 }`}
               >
                 <i className="fas fa-stopwatch mr-2"></i> Stopwatch
@@ -206,11 +206,11 @@ const Timer = () => {
 
           {/* Timer Display */}
           <div className="flex flex-col items-center mb-8">
-            <div className="timer-display mb-2">{formatTime(timeLeft)}</div>
-            <div className="text-sm text-gray-400 mb-4">{timerStatus}</div>
-            <div className="w-full bg-gray-800 rounded-full h-2.5 mb-6">
+            <div className="timer-display mb-4">{formatTime(timeLeft)}</div>
+            <div className="text-lg text-info font-medium mb-6">{timerStatus}</div>
+            <div className="w-full progress-bar h-3 mb-6">
               <div 
-                className="bg-gradient-to-r from-blue-500 to-purple-500 h-2.5 rounded-full transition-all duration-300"
+                className="progress-fill h-3 transition-all duration-500"
                 style={{ width: `${updateProgress()}%` }}
               ></div>
             </div>
@@ -221,21 +221,21 @@ const Timer = () => {
             <button 
               onClick={startTimer}
               disabled={isRunning && !isPaused}
-              className="btn-neon px-6 py-3 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+              className="btn-success px-8 py-4 text-lg disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <i className="fas fa-play mr-2"></i> {isPaused ? 'Resume' : 'Start'}
             </button>
             <button 
               onClick={pauseTimer}
               disabled={!isRunning || isPaused}
-              className="px-6 py-3 rounded-lg bg-gray-700 hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="btn-warning px-6 py-4 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <i className="fas fa-pause mr-2"></i> Pause
             </button>
             <button 
               onClick={resetTimer}
               disabled={!isRunning && !isPaused}
-              className="px-6 py-3 rounded-lg bg-gray-700 hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="btn-secondary px-6 py-4 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <i className="fas fa-redo mr-2"></i> Reset
             </button>
@@ -243,13 +243,19 @@ const Timer = () => {
         </div>
 
         {/* Session History */}
-        <div className="card p-6 rounded-lg flex-1">
-          <h3 className="text-xl font-semibold mb-4">Recent Sessions</h3>
+        <div className="card p-6 flex-1">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-xl font-semibold text-primary">Recent Sessions</h3>
+            <i className="fas fa-history text-info text-lg"></i>
+          </div>
           
           <div className="overflow-y-auto max-h-96">
             <div className="space-y-3">
               {sessions.length === 0 ? (
-                <div className="text-gray-500 text-center py-8">No sessions recorded yet</div>
+                <div className="text-secondary text-center py-12">
+                  <i className="fas fa-clock text-4xl mb-4 opacity-50"></i>
+                  <p>No sessions recorded yet</p>
+                </div>
               ) : (
                 sessions.map((session) => {
                   const date = new Date(session.date)
@@ -263,16 +269,16 @@ const Timer = () => {
                   const timeInSeconds = totalMinutes * 60
                   
                   return (
-                    <div key={session.id} className="bg-gray-800 p-3 rounded-md">
-                      <div className="flex justify-between items-center">
-                        <span className="font-medium">{session.subject}</span>
-                        <span className="text-sm text-gray-400">{date.toLocaleDateString()}</span>
+                    <div key={session.id} className="stat-card mb-3">
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="font-semibold text-primary">{session.subject}</span>
+                        <span className="text-sm text-secondary">{date.toLocaleDateString()}</span>
                       </div>
-                      <div className="mt-1 flex justify-between items-center">
-                        <span className="text-sm text-gray-300">
-                          <i className="fas fa-clock text-blue-400 mr-1"></i> {timeText}
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-success flex items-center">
+                          <i className="fas fa-clock mr-2"></i> {timeText}
                         </span>
-                        <span className="text-xs px-2 py-1 bg-blue-900 rounded-full">{formatTime(timeInSeconds)}</span>
+                        <span className="status-applied text-xs px-3 py-1">{formatTime(timeInSeconds)}</span>
                       </div>
                     </div>
                   )

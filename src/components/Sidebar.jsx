@@ -11,9 +11,9 @@ const Sidebar = ({ activeSection, setActiveSection }) => {
   return (
     <aside className="sidebar w-64 h-screen fixed top-0 left-0 overflow-y-auto">
       <div className="p-4 flex flex-col h-full">
-        <div className="mb-8">
-          <h1 className="text-2xl font-bold mb-1 neon-text">LaunchLog</h1>
-          <p className="text-sm text-gray-400">Like a launchpad for your career, logs all progress.</p>
+        <div className="mb-10">
+          <h1 className="text-3xl font-bold mb-2 welcome-gradient">LaunchLog</h1>
+          <p className="text-sm text-secondary leading-relaxed">Like a launchpad for your career, logs all progress.</p>
         </div>
         
         <nav className="space-y-2 flex-grow">
@@ -55,13 +55,13 @@ const Sidebar = ({ activeSection, setActiveSection }) => {
           </button>
         </nav>
         
-        <div className="mt-auto pt-4 border-t border-gray-700">
+        <div className="mt-auto pt-6 border-t border-divider-lines">
           <button 
             onClick={handleResetData}
-            className="flex items-center p-3 text-red-400 hover:text-red-300 w-full text-left"
+            className="flex items-center p-3 text-danger hover:text-soft-coral-red w-full text-left rounded-lg transition-all hover:bg-elevated-bg"
           >
-            <i className="fas fa-trash-alt mr-3"></i>
-            <span>Reset All Data</span>
+            <i className="fas fa-trash-alt mr-3 text-lg"></i>
+            <span className="font-medium">Reset All Data</span>
           </button>
         </div>
       </div>
